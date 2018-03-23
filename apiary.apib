@@ -11,14 +11,13 @@ This online document describes Home Credit (HC) One-Click API - the means for pa
 
 The aim of here described services is to allow customers the smooth running through the process of an online purchase. The services that allow achieving this goal are divided into the following groups:
 
-| Group of services       | Purpose |
-| ---                     | ---     |
-| Security                | Security rules and principles |
-| Application operations  | Services that allows processing of *application* and *order* during their whole lifecycle |
-| Offers operations       | Services that allow partner's e-shops to implement an installment calculator on their websites |
-| Precheck operations     | Services that allow partner's e-shops find out a probability of *application's* approval and limits of particular *customer*, if known to HC |
-| Merchantsite operations | Services that should be developed and exposed by partner's e-shops to allow HC asynchronously inform these partner's e-shops about important changes regarding particular *applications* and *orders* |
-| Health check            | Health check usage description |
+| Group of services       | Purpose                                                                                                                                                                                           |
+| ---                     | ---                                                                                                                                                                                               |
+| Security                | Security rules and principles                                                                                                                                                                     |
+| Application operations  | Services that allows processing of *application* and *order* during their whole lifecycle                                                                                                         |
+| Offers operations       | Services that allow partner e-shops to implement an installment calculator on their websites                                                                                                      |
+| Merchantsite operations | Services that should be developed and exposed by partner e-shops to allow HC asynchronously inform these partner e-shops about important changes regarding particular *applications* and *orders* |
+| Health check            | Health check usage description                                    
 
 ### Basic implementation
 The most basic and minimum way how to implement HCO API is to at least implement:
@@ -41,7 +40,7 @@ It is necessary to fill all attributes marked as required in the request but fil
 - we use CAPITAL_UNDERSCORE for enum values
 - we use plural in resource names
 
-## Paging - TODO (reálné příklady)
+## Paging
 - some resources (stated in documentation) that return collection of objects support pagination. We are using technique known as 'cursor-based pagination'.
 - on request:
   - query parameter `limit` specifies maximum number of objects in returned collection
@@ -70,7 +69,7 @@ Example response pagingInfo:
 }
 ```
 
-## Sorting - TODO (reálné příklady)
+## Sorting
 - some resources (stated in documentation) supports result sorting. You can specify sorting attributes and order using `sort` request parameter. For ascending order, specify just attribute name; for descending order, add unary - in front of attribute name. You can specify multiple attributes for sorting, separated by comma.
 - each resource that supports sorting specifies list of attributes that can be used for sorting.
 
@@ -80,7 +79,7 @@ Examples:
 - `/banking/accounts?sort=accountType,-accountCurrency,accountName` - get list of accounts, sorted by type (ascending), then by currency descending and then by account name (ascending)
 
 
-## Filtering - TODO (reálné příklady)
+## Filtering
 Some resources (stated in documentation) supports results filtering. Such resources have list of filters specified together with possible operations and possible values.
 
 You can specify filtering by passing `filter` attribute. General pattern to specify filter is:
@@ -107,14 +106,14 @@ GET /general/contracts?filter=contractDate|gt|2016-02-10;contractDate|lteq|2016-
 
 
 ### List of operators
-| operator | meaning |
-| ---      | ---     |
-| lt       | less than |
-| lteq     | less than or equals |
-| eq       | equals    |
-| gteq     | greater than or equals    |
-| gt       | greater than |
-| in       | value in list |
+| Operator | Meaning                |
+| ---      | ---                    |
+| lt       | less than              |
+| lteq     | less than or equals    |
+| eq       | equals                 |
+| gteq     | greater than or equals |
+| gt       | greater than           |
+| in       | value in list          |
 
 
 ## Request restrictions
@@ -196,13 +195,13 @@ Errors object example:
 ```
 
 Error object attributes
-| attribute name | description |
-| ---            | ---         |
-| code           | unique error code |
-| message        | human readable error description (non-localized) |
-| severity       | error severity ([see below](#error-severity)) |
+| Attribute name | Description                                                     |
+| ---            | ---                                                             |
+| code           | unique error code                                               |
+| message        | human readable error description (non-localized)                |
+| severity       | error severity ([see below](#error-severity))                   |
 | attribute      | json path of request attribute that caused the error (optional) |
-| ticketId       | internal ticket ID, used for error backtracking |
+| ticketId       | internal ticket ID, used for error backtracking                 |
 
 <a name="error-severity"></a>
 There are 3 levels of error severity:
@@ -211,12 +210,12 @@ There are 3 levels of error severity:
 - `INFO` - information only, execution can continue without user interaction.
 
 ### Errors overview
-| Status code | Code | Message |
-| ---         | ---  | ---     |
-| 400 | INVALID_REQUEST | (*Various messages possible*) e.g. Unsupported combination of application state and order state |
-| 404 | OBJECT_NOT_FOUND | (*Various messages possible*) e.g. Specified object was not found |
-| 422 | NOT_SUPPORTED | (*Various messages possible*) e.g. Not supported for the financing type `INSTALLMENT`. Contact your sales rep. |
-| 500 | INTERNAL_SERVER_ERROR | (*Various messages possible*) e.g. Failed to parse given JSON  |
+| Status code | Code                  | Explanation                                                                     | Message                                                                                                        |
+| ---         | ---                   | ---                                                                             | ---                                                                                                            |
+| 400         | INVALID_REQUEST       | Request was not well formatted (malformed request syntax, size too large, etc.) | (*Various messages possible*) e.g. Unsupported combination of application state and order state                  |
+| 404         | OBJECT_NOT_FOUND      | The requested resource could not be found                                       | (*Various messages possible*) e.g. Specified object was not found                                              |
+| 422         | NOT_ALLOWED           | Operation is not allowed (internal reason)                                      | (*Various messages possible*) e.g. Not allowed (other reason)                                                    |
+| 500         | INTERNAL_SERVER_ERROR | Unexpected condition was encountered and no more specific message is suitable   | (*Various messages possible*) e.g. Failed to parse given JSON                                                  |
 
 
 ## Formats
@@ -238,8 +237,6 @@ There are 3 levels of error severity:
 
 # Group Testing & Integration
 This section should help new partner's e-shop developers with better understanding of the API and connected processes especially during early stages of the API integration.
-
-
 
 
 # Group Security
@@ -314,9 +311,7 @@ Elementary flow starts when customer wants to use one of Home Credit's payment m
 | Financing type     | Supported |
 | ---                | ---       |
 | `INSTALLMENT`      | YES       |
-| `TRY_AND_PAY`      | YES       |
-| `DEFERRED_PAYMENT` | YES       |
-| `SUBSCRIPTION`     | NO        |
+
 
 Use `/financing/v1/applications` resource with properly filled request that contains at least following data
 - Customer information
@@ -339,12 +334,12 @@ Use `/financing/v1/applications` resource with properly filled request that cont
     - Order item name
     - Total price (all pieces, including VAT)
     - Total VAT
-- Financing type
+- Financing type (always `INSTALLMENT`)
 - Details of selected financing type (if required depends on selected financing type)
   - \*Installment settings - preferred installment amount
   - \*Installment settings - preferred downpayment amount
   - \*Installment settings - installment program product code
-- Personal data processing agreement
+- Personal data processing agreement (* will not be required when GDPR comes into force)
 - Additional information necessary for the continuation and completion of the process
   - Your URL where the customer should be redirected after application approval
   - Your URL where the customer should be redirected after application rejection
@@ -360,11 +355,11 @@ If the request was successfully processed, you receive HTTP status code 201 and 
 If the request was recognized as duplication, you receive HTTP status code 200 and the *application* object created during the first related successful request.
 
 In other cases, you receive one of the following errors:
-| Status code | Code | Message |
-| --- | --- | --- |
-| 400 | INVALID_REQUEST       | *Various messages possible* |
-| 422 | UNPROCESSABLE         | *Various messages possible* |
-| 500 | INTERNAL_SERVER_ERROR | *Various messages possible* |
+| Status code | Code                  | Explanation                                                                      |
+| ---         | ---                   | ---                                                                              |
+| 400         | INVALID_REQUEST       | Request was not well formatted (malformed request syntax, size too large, etc.)  |
+| 422         | UNPROCESSABLE         | Request was well-formed but was unable to be followed due to semantic errors     |
+| 500         | INTERNAL_SERVER_ERROR | Unexpected condition was encountered and no more specific message is suitable    |
 
 
 ### Create application [POST]
@@ -389,14 +384,11 @@ Create new *application* of particular financing type
 
 
 ## Application detail [/financing/v1/applications/{applicationId}]
-If you need to find out current information about particular *application* - primarily its state and other details - use `/financing/v1/applications/{applicationId}` resource where `{applicationId}` is the application ID you received in the response of `/financing/v1/applications` after its creation.
+If you need to find out current information about particular *application* - primarily its state and other details - use `/financing/v1/applications/{applicationId}` resource where `{applicationId}` is the *application* ID you received in the response of `/financing/v1/applications` after its creation.
 
 | Financing type     | Supported         |
 | ---                | ---               |
-| `INSTALLMENT`      | YES (limited use) |
-| `TRY_AND_PAY`      | YES               |
-| `DEFERRED_PAYMENT` | YES               |
-| `SUBSCRIPTION`     | NO                |
+| `INSTALLMENT`      | YES               |
 
 If the request was successfully processed, you receive HTTP status code 200 and *application* object with at least following information in the response:
 - Application unique ID
@@ -406,12 +398,12 @@ If the request was successfully processed, you receive HTTP status code 200 and 
 - Gateway redirect URL
 
 In other cases, you receive one of the following errors:
-| Status code | Code | Message |
-| --- | --- | --- |
-| 400 | INVALID_REQUEST       | *Various messages possible* |
-| 404 | APPLICATION_NOT_FOUND | *Various messages possible* |
-| 422 | UNPROCESSABLE         | *Various messages possible* |
-| 500 | INTERNAL_SERVER_ERROR | *Various messages possible* |
+| Status code | Code                  | Message                                                                          |
+| ---         | ---                   | ---                                                                              |
+| 400         | INVALID_REQUEST       | Request was not well formatted (malformed request syntax, size too large, etc.)  |
+| 404         | APPLICATION_NOT_FOUND | The requested resource could not be found                                        |
+| 422         | UNPROCESSABLE         | The request was well-formed but was unable to be followed due to semantic errors |
+| 500         | INTERNAL_SERVER_ERROR | Unexpected condition was encountered and no more specific message is suitable    |
 
 + Parameters
     + applicationId (string, required, `01-11200a0ee1`)
@@ -434,219 +426,42 @@ Get specific *application* detail by ID
     + Attributes (Errors)
 
 
-## Request application OTP [/financing/v1/applications/{applicationId}/requestOTP]
-If you want to integrate customer *application* authorisation into merchant's checkout, this method is needed for sending the OTP to customer by SMS.
-OTP is required to verify *application*. See [Verify Application](#reference/application-operations/verify-application) method.
-
-| Financing type     | Supported |
-| ---                | ---       |
-| `INSTALLMENT`      | NO        |
-| `TRY_AND_PAY`      | YES       |
-| `DEFERRED_PAYMENT` | YES       |
-| `SUBSCRIPTION`     | NO        |
-
-| Application state | Availability |
-| ---               | ---          |
-| `PROCESSING`      | YES (`stateReason = PROCESSING_VERIFICATION`)|
-| `REJECTED`        | NO           |
-| `CANCELLED`       | NO           |
-| `READY`           | NO           |
-
-Possible error codes explanation:
-| Error status code | Code | Explanation |
-| ---               | ---  | ---         |
-| 400 | INVALID_REQUEST       | *Various messages possible* |
-| 404 | OBJECT_NOT_FOUND      | *Various messages possible* |
-| 422 | EXPLOITED_MAX_SMS_SENT     | Number of available SMS for time unit exceeded                                             |
-| 422 | REPEATED_REQUEST_TOO_EARLY | Repeated request violated security time span                                               |
-| 422 | NOT_ALLOWED                | Not allowed (other reasons)|
-| 422 | NO_VERIF_MOBILE            | Customer has not verified mobile                                                           |
-| 500 | FAILURE                    | Internal failure                    |
-
-+ Parameters
-    + applicationId (string, required, `02-11b00a1ef1`)
-
-
-### Request application OTP [POST]
-Request sending of one-time password to customer by SMS. This OTP is required to verify *application*. See [Verify Application](#reference/application-operations/verify-application) method.
-
-+ Request (application/json; charset=utf-8)
-    + Attributes (RequestApplicationOTPRequest)
-
-+ Response 200(application/json; charset=utf-8)
-
-        SMS with OTP was send to customer's primary phone number
-
-    + Attributes (RequestApplicationOTPResponse)
-
-
-+ Response 422(application/json; charset=utf-8)
-
-        SMS with OTP was NOT send to customer
-
-    + Attributes (Errors)
-
-
-## Verify application  [/financing/v1/applications/{applicationId}/verify]
-If you want to integrate customer *application authorisation* into merchant's checkout, this method is needed for verifying the *application* with the OTP sent to customer by SMS.
-To send OTP to customer see [Request application OTP](#reference/application-operations/request-application-otp) method.
-
-| Financing type     | Supported |
-| ---                | ---       |
-| `INSTALLMENT`      | NO        |
-| `TRY_AND_PAY`      | YES       |
-| `DEFERRED_PAYMENT` | YES       |
-| `SUBSCRIPTION`     | NO        |
-
-| Application state | Availability |
-| ---               | ---          |
-| `PROCESSING`      | YES (`stateReason = PROCESSING_VERIFICATION`)|
-| `REJECTED`        | NO           |
-| `CANCELLED`       | NO           |
-| `READY`           | NO           |
-
-Possible error codes explanation:
-| Error status code | Code | Explanation |
-| ---               | ---  | ---         |
-| 400 | INVALID_REQUEST       | *Various messages possible* |
-| 404 | OBJECT_NOT_FOUND      | *Various messages possible* |
-| 422 | NOT_AUTHORIZED        | Incorrect OTP code                 |
-| 422 | NOT_AUTHORIZED_BLOCKED | Limit of attempts for OTP verification exceeded |
-| 422 | OTP_EXPIRED       | Validity of OTP code expired                                                      |
-| 422 | NOT_ALLOWED         | Verification is not allowed                                                                       |
-| 500 | FAILURE                | Internal failure          |
-
-+ Parameters
-    + applicationId (string, required, `02-11b00a1ef1`)
-
-
-### Verify application [POST]
-Verify *application* with OTP sent to customer by SMS. To send OTP to customer see [Request application OTP](#reference/application-operations/request-application-otp) method.
-
-Use `/financing/v1/applications/{applicationId}/verify` resource with properly filled request that contains customer's OTP in request.
-
-+ Request (application/json; charset=utf-8)
-    + Attributes (VerifyRequest, required)
-
-
-+ Response 200(application/json; charset=utf-8)
-
-        Application was verified correctly
-
-    + Attributes (Application)
-
-
-+ Response 422(application/json; charset=utf-8)
-
-        Application was not verified
-
-    + Attributes (Errors)
-
-
-## Send application additional data [/financing/v1/applications/{applicationId}/additionalData]
-If you want to integrate gathering customer additional data needed for completing the *application* into merchant's checkout, this method is needed for completing the *application* with the additional data.
-
-This operation is needed because of some customers' applications, that are not approved/rejected just with data send in *Create application*, but they are approved/rejected after additional data are sent.
-
-To determine what additional data is needed see `additionalData` array on *application* ([Application detail](#reference/application-operations/application-detail)).
-
- > IMPORTANT NOTE: It's always necessary to check *application* `stateReason`. If `stateReason` after sending additional data is still `stateReason == PROCESSING_ADDITIONAL_DATA` check `additionalData` for new data to send.
-
-| Financing type     | Supported |
-| ---                | ---       |
-| `INSTALLMENT`      | NO        |
-| `TRY_AND_PAY`      | YES       |
-| `DEFERRED_PAYMENT` | YES       |
-| `SUBSCRIPTION`     | NO        |
-
-| Application state | Availability |
-| ---               | ---          |
-| `PROCESSING`      | YES (`stateReason = PROCESSING_ADDITIONAL_DATA`)|
-| `REJECTED`        | NO           |
-| `CANCELLED`       | NO           |
-| `READY`           | NO           |
-
-Possible *application* `state` and `stateReason` after calling this operation:
-1. Application state `READY` or `REJECTED` if sent application data are processed and checked so *application* is completed.
-1. Application state `PROCESSING` with state reason `PROCESSING_ADDITIONAL_DATA` if there are more additional data needed.
-    * For example: customer is firstly asked to add `PERSONAL_ID`. After sending personal id via this operation system evaluate that it's not enough and customer is asked to add `ID_CARD_NO`.
-1. Application state `PROCESSING` with state reason `PROCESSING_REVIEW` if the manual review of application is needed. There is no way how to complete *application* in this state throught API calls or via redirection to `gatewayRedirectUrl`.
-1. Application state `PROCESSING` with state reason `PROCESSING_VERIFICATION` if additional data was processed and checked so *application* can be completed by verify application process (see [Verify application](#reference/application-operations/verify-application) method). Other way how to complete *application* is to redirect customer to `gatewayRedirectUrl`.
-1. Application state `PROCESSING` with state reason `PROCESSING_REDIRECT_NEEDED` if there is no way how to complete *application* throught API calls and you have to redirect customer to `gatewayRedirectUrl`.
-
-Possible error codes explanation:
-| Error status code | Code | Explanation |
-| ---               | ---  | ---         |
-| 400 | INVALID_REQUEST       | *Various messages possible* |
-| 404 | OBJECT_NOT_FOUND      | *Various messages possible* |
-| 422 | PERSONAL_ID_INVALID  | PersonalId is not valid, please send valid PersonalId        |
-| 422 | ADDITIONAL_DATA_NOT_REQUIRED  | Application is not in state which allows use of this method. See stateReason for recommended next step.      |
-| 422 | ADDITIONAL_DATA_NOT_MATCHING  | Additional data does not match with client details. See stateReason for recommended next step.      |
-| 500 | FAILURE                | Internal failure          |
-
-+ Parameters
-    + applicationId (string, required, `02-11b00a1ef1`)
-
-
-### Send application additional data [POST]
-Send additional data needed to complete the *application*.
-
-+ Request (application/json; charset=utf-8)
-    + Attributes (AdditionalDataRequest)
-
-
-+ Response 200(application/json; charset=utf-8)
-
-        Data was accepted
-
-    + Attributes (Application)
-
-
-+ Response 400(application/json; charset=utf-8)
-
-        Error in processing request
-
-    + Attributes (Errors)
-
-
 ## Cancel application [/financing/v1/applications/{applicationId}/cancel]
-If there is need to completely cancel customer's *order*, it is necessary to cancel respective *application*. For this purpose use `/financing/v1/applications/{applicationId}/cancel` resource where `{applicationId}` is the application ID you received in the response of `/financing/v1/applications` after its creation.
+If there is need to completely cancel customer's *order*, it is necessary to cancel respective *application*. For this purpose use `/financing/v1/applications/{applicationId}/cancel` resource where `{applicationId}` is the *application* ID you received in the response of `/financing/v1/applications` after its creation.
 
 | Financing type     | Supported |
 | ---                | ---       |
 | `INSTALLMENT`      | YES       |
-| `TRY_AND_PAY`      | YES       |
-| `DEFERRED_PAYMENT` | YES       |
-| `SUBSCRIPTION`     | NO        |
 
 | Application state | Availability |
 | ---               | ---          |
 | `REJECTED`        | NO           |
 | `CANCELLED`       | YES          |
 | `PROCESSING`      | YES          |
-| `READY`           | YES *(for financing types `TRY_AND_PAY` and `DEFERRED_PAYMENT` available only when `Application.stateReason = READY_TO_SHIP`)|
+| `READY`           | YES          |
 
-If the request was successfully processed, you receive HTTP status code 200 and object of information about cancelled *order* plus basic information about respective *application* (ID, state, substate) with at least following information in the response:
+If the request was successfully processed, you receive HTTP status code 200 and information about cancelled *application* with at least following information in the response:
 - Application unique ID
 - Application type
 - Application state
 - Application substate
 
 In other cases, you receive one of the following errors:
-| Status code | Code | Message |
-| --- | --- | --- |
-| 400 | INVALID_REQUEST       | *Various messages possible* |
-| 404 | OBJECT_NOT_FOUND      | *Various messages possible* |
-| 422 | UNPROCESSABLE         | *Various messages possible* |
-| 500 | INTERNAL_SERVER_ERROR | *Various messages possible* |
+| Status code | Code                  | Explanation                                                                      |
+| ---         | ---                   | ---                                                                              |
+| 400         | INVALID_REQUEST       | Request was not well formatted (malformed request syntax, size too large, etc.)  |
+| 404         | OBJECT_NOT_FOUND      | The requested resource could not be found                                        |
+| 422         | UNPROCESSABLE         | The request was well-formed but was unable to be followed due to semantic errors |
+| 422         | APPLICATION_REJECTED  | When you try to cancel already `REJECTED` `Application`, which is not allowed    |
+| 500         | INTERNAL_SERVER_ERROR | Unexpected condition was encountered and no more specific message is suitable    |
 
 
 + Parameters
-    + applicationId (string, required, `02-11b00a1ef1`)
+    + applicationId (string, required, `01-11b00a1ef1`)
 
 
 ### Cancel application [PUT]
-Cancel *application*, or cancel recurring payment.
+Cancel *application*.
 
 + Request (application/json; charset=utf-8)
     + Attributes (ApplicationCancelRequest)
@@ -664,24 +479,20 @@ Cancel *application*, or cancel recurring payment.
     + Attributes (Errors)
 
 
-## Change application order [/financing/v1/applications/{applicationId}/order]
-When there's some changes within *order* that may have an importatnt impact on the approval process (e.g. change in order items that impacts the total price of the *order* or other billing information) after its submission, use `/financing/v1/applications/{applicationId}/order` resource in order we can adjust everything properly. `{applicationId}` is the application ID you received in the response of `/financing/v1/applications` after its creation.
+## Mark order as sent [/financing/v1/applications/{applicationId}/order/send]
+When the whole *order* was shipped to the customer, use `/financing/v1/applications/{applicationId}/order/send` resource where `{applicationId}` is the *application* ID you received in the response of `/financing/v1/applications` after its creation.
 
 | Financing type     | Supported |
 | ---                | ---       |
-| `INSTALLMENT`      | NO        |
-| `TRY_AND_PAY`      | YES       |
-| `DEFERRED_PAYMENT` | YES       |
-| `SUBSCRIPTION`     | NO        |
+| `INSTALLMENT`      | YES       |
 
-| Application state | Availability |
-| ---               | ---          |
-| `REJECTED`        | NO           |
-| `CANCELLED`       | NO           |
-| `PROCESSING`      | YES          |
-| `READY`           | YES          |
+| Application state | Availability                                                           |
+| ---               | ---                                                                    |
+| `PROCESSING`      | NO                                                                     |
+| `REJECTED`        | NO                                                                     |
+| `CANCELLED`       | NO                                                                     |
+| `READY`           | YES  (* available only when `Application.stateReason = READY_TO_SHIP`) |
 
-Use `/financing/v1/applications/{applicationId}/order` resource with properly filled request that contains (only) changed data (resource allows partial put).
 
 If the request was successfully processed, you receive HTTP status code 200 and object of information about changed *order* plus basic information about respective *application* (ID, state, substate) with at least following information in the response:
 - Order number
@@ -705,195 +516,22 @@ If the request was successfully processed, you receive HTTP status code 200 and 
   - Application state
   - Application substate
 
-In other cases, you receive one of the following errors:
-| Status code | Code | Message |
-| --- | ---                   | ---                         |
-| 400 | INVALID_REQUEST       | *Various messages possible* |
-| 404 | OBJECT_NOT_FOUND      | *Various messages possible* |
-| 422 | NOT_SUPPORTED         | CZ: Not supported for the financing type INSTALLMENT. Contact Home Credit: (CZ) smlouvy@homecredit.cz or +420 541 598 598, (SK) kompletace@homecredit.cz or +421 337 767 157 |
-| 500 | INTERNAL_SERVER_ERROR | *Various messages possible* |
-
-
-+ Parameters
-    + applicationId (string, required, `02-11b00a1ef1`)
-
-
-### Change application order [PUT]
-Change *order*. Used to change order items, total amount, billing details etc.
-
-+ Request (application/json; charset=utf-8)
-    + Attributes (OrderChangeRequest)
-
-
-+ Response 200(application/json; charset=utf-8)
-        Order was changed
-
-    + Attributes (OrderExtended)
-
-
-+ Response 422(application/json; charset=utf-8)
-    Order can not be changed.
-
-    + Attributes (Errors)
-
-
-## Mark order items as cancelled  [/financing/v1/applications/{applicationId}/order/cancel]
-When some or all order items were cancelled (as a result of reclamation etc.), use `/financing/v1/applications/{applicationId}/order/cancel` resource where `{applicationId}` is the application ID you received in the response of `/financing/v1/applications` after its creation.
-
-| Financing type     | Supported |
-| ---                | ---       |
-| `INSTALLMENT`      | NO        |
-| `TRY_AND_PAY`      | YES       |
-| `DEFERRED_PAYMENT` | YES       |
-| `SUBSCRIPTION`     | NO        |
-
-| Application state | Availability |
-| ---               | ---          |
-| `PROCESSING`      | YES           |
-| `REJECTED`        | NO           |
-| `CANCELLED`       | NO           |
-| `READY`           | NO          |
-
-Use `/financing/v1/applications/{applicationId}/order/cancel` resource with an empty request to cancel all order items (the whole *order*) at once.
-
-> * TIP: Use an empty request if marking last item(s) on order as cancelled.
-
-If you want to cancel specific order item/s, use `/financing/v1/applications/{applicationId}/order/cancel` resource with properly filled request that contains cancelled order items info. In this case request should contain at least following data:
-- Order items (array of cancelled order items)
-  - *one or more particular order item identificators (`code`/`EAN`/`name`)* - `code`, `ean` and `name` is used for identifying order item sent in `Create application`.
-
-> * **ATTENTION:** If multiple properties (`code`, `ean` or `name`) are used for identifying some order item, it all must exact match the item data.
-
-If the request was successfully processed, you receive HTTP status code 200 and object of information about changed *order* plus basic information about respective *application* (ID, state, substate) with at least following information in the response:
-- Order number
-- Order total price (including VAT)
-- Order total VAT (array of VAT amounts split by VAT rates)
-- Addresses (array)
-  - Country
-  - City
-  - Street
-  - Street number
-  - ZIP
-  - Address type
-- Order items (array)
-  - Order item name
-  - Total price (all pieces, including VAT)
-  - Total VAT
-  - Order item state
-- Order state
-- Application basic information
-  - ID
-  - Application state
-  - Application substate
-
-In other cases, you receive one of the following errors:
-| Status code | Code | Message |
-| --- | --- | --- |
-| 400 | INVALID_REQUEST       | *Various messages possible* |
-| 404 | OBJECT_NOT_FOUND      | *Various messages possible* |
-| 422 | NOT_SUPPORTED | CZ: Not supported for the financing type INSTALLMENT. Contact Home Credit: (CZ) smlouvy@homecredit.cz or +420 541 598 598, (SK) kompletace@homecredit.cz or +421 337 767 157 |
-| 500 | INTERNAL_SERVER_ERROR | *Various messages possible* |
+  In other cases, you receive one of the following errors:
+  | Status code | Code                  | Explanation                                                                      |
+  | ---         | ---                   | ---                                                                              |
+  | 400         | INVALID_REQUEST       | Request was not well formatted (malformed request syntax, size too large, etc.)  |
+  | 404         | OBJECT_NOT_FOUND      | The requested resource could not be found                                        |
+  | 422         | NOT_SUPPORTED         | Resource is not in supported state (substate)                                    |
+  | 500         | INTERNAL_SERVER_ERROR | Unexpected condition was encountered and no more specific message is suitable    |
 
 + Parameters
-    + applicationId (string, required, `02-11b00a1ef1`)
+    + applicationId (string, required, `01-11b00a1ef1`)
 
 
-### Mark order items as cancelled [PUT]
-Mark order items as cancelled
+### Mark order as sent [PUT]
+Mark order as sent.
 
-System notification. Some or all of the order items were cancelled. Based on *application* financing type and partner setting, credit note may be issued.
-
-
-+ Request (application/json; charset=utf-8)
-    + Attributes (OrderItemsCancelRequest)
-
-
-+ Response 200(application/json; charset=utf-8)
-        Some order items or the whole order was cancelled
-
-
-    + Attributes (OrderExtended)
-
-
-+ Response 422(application/json; charset=utf-8)
-
-        Order items can not be canceled.
-
-    + Attributes (Errors)
-
-
-## Mark order items as sent [/financing/v1/applications/{applicationId}/order/send]
-When some or all order items were shipped to the customer, use `/financing/v1/applications/{applicationId}/order/send` resource where `{applicationId}` is the application ID you received in the response of `/financing/v1/applications` after its creation.
-
-| Financing type     | Supported |
-| ---                | ---       |
-| `INSTALLMENT`      | YES *     |
-| `TRY_AND_PAY`      | YES       |
-| `DEFERRED_PAYMENT` | YES       |
-| `SUBSCRIPTION`     | YES       |
-
-| Application state | Availability |
-| ---               | ---          |
-| `PROCESSING`      | NO           |
-| `REJECTED`        | NO           |
-| `CANCELLED`       | NO           |
-| `READY`           | YES  (* for financing type `INSTALLMENT` available only when `Application.stateReason = READY_TO_SHIP`)        |
-
-Use `/financing/v1/applications/{applicationId}/order/send` resource with an empty request to mark all order items (the whole Order) as sent at once.
-
-> TIP: Use an empty request if marking last item(s) on order as sent.
-
-> **ATTENTION:** An empty request is the only valid way for financing type `INSTALLMENT`
-
-If you want to mark specific order item/s as sent, use `/financing/v1/applications/{applicationId}/order/send` resource with properly filled request that contains sent order items info. In this case request should contain at least following data:
-- Order items (array of sent order items)
-  - *one or more particular order item identificators (`code`/`EAN`/`name`)* - `code`, `ean` and `name` is used for identifying order item sent in `Create application`.
-
-> * **ATTENTION:** If multiple properties (`code`, `ean` or `name`) are used for identifying some order item, it all must exact match the item data.
-
-If the request was successfully processed, you receive HTTP status code 200 and object of information about changed *order* plus basic information about respective *application* (ID, state, substate) with at least following information in the response:
-- Order number
-- Order total price (including VAT)
-- Order total VAT (array of VAT amounts split by VAT rates)
-- Addresses (array)
-  - Country
-  - City
-  - Street
-  - Street number
-  - ZIP
-  - Address type
-- Order items (array)
-  - Order item name
-  - Total price (all pieces, including VAT)
-  - Total VAT
-  - Order item state
-- Order state
-- Application basic information
-  - ID
-  - Application state
-  - Application substate
-
-In other cases, you receive one of the following errors:
-| Status code | Code | Message |
-| --- | --- | --- |
-| 400 | INVALID_REQUEST       | *Various messages possible* |
-| 404 | OBJECT_NOT_FOUND      | *Various messages possible* |
-| 422 | NOT_SUPPORTED | CZ: Not supported for the financing type INSTALLMENT. Contact Home Credit: (CZ) smlouvy@homecredit.cz or +420 541 598 598, (SK) kompletace@homecredit.cz or +421 337 767 157 |
-| 500 | INTERNAL_SERVER_ERROR | *Various messages possible* |
-
-+ Parameters
-    + applicationId (string, required, `02-11b00a1ef1`)
-
-
-### Mark order items as sent [PUT]
-Mark order items as sent
-
-System notification. Some or all order items were shipped to customer.
-Based on *application* financing type and partner setting, application payment may be processed.
-
-+ Request (application/json; charset=utf-8)
-    + Attributes (OrderItemsSendRequest)
-
+System notification. The whole *order* was shipped to the customer. Based on partner's settings, application payment may be processed.
 
 + Response 200(application/json; charset=utf-8)
         Order items or whole order is marked as shipped
@@ -907,34 +545,19 @@ Based on *application* financing type and partner setting, application payment m
     + Attributes (Errors)
 
 
-## Mark order items as delivered [/financing/v1/applications/{applicationId}/order/deliver]
-When some or all order items were delivered to the customer, use `/financing/v1/applications/{applicationId}/order/deliver` resource where `{applicationId}` is the application ID you received in the response of `/financing/v1/applications` after its creation.
-
-Undeliverable items (all except `PHYSICAL` and `DIGITAL`) and items with `order.items.totalPrice.amount <= 0` will be marked to `DELIVERED`, if there are no more deliverable items, which are not `DELIVERED`.
+## Mark order as delivered [/financing/v1/applications/{applicationId}/order/deliver]
+When the whole *order* was delivered to the customer, use `/financing/v1/applications/{applicationId}/order/deliver` resource where `{applicationId}` is the *application* ID you received in the response of `/financing/v1/applications` after its creation.
 
 | Financing type     | Supported |
 | ---                | ---       |
-| `INSTALLMENT`      | YES *     |
-| `TRY_AND_PAY`      | YES       |
-| `DEFERRED_PAYMENT` | YES       |
-| `SUBSCRIPTION`     | NO        |
+| `INSTALLMENT`      | YES       |
 
-| Application state | Availability |
-| ---               | ---          |
-| `PROCESSING`      | NO           |
-| `REJECTED`        | NO           |
-| `CANCELLED`       | NO           |
-| `READY`           | YES (* for financing type `INSTALLMENT` available only when `Application.stateReason = READY_TO_SHIP`)         |
-
-Use `/financing/v1/applications/{applicationId}/order/deliver` resource with an empty request to mark all order items (the whole *order*) as delivered at once.
-
-> * TIP: Use an empty request if marking last item(s) on order as delivered.
-
-If you want to mark specific order item/s as delivered, use `/financing/v1/applications/{applicationId}/order/deliver` resource with properly filled request that contains delivered order items info. In this case request should contain at least following data:
-- Order items (array of delivered order items)
-  - *one or more particular order item identificators (`code`/`EAN`/`name`)* - `code`, `ean` and `name` is used for identifying order item sent in `Create application`.
-
-> * **ATTENTION:** If multiple properties (`code`, `ean` or `name`) are used for identifying some order item, it all must exact match the item data.
+| Application state | Availability                                                          |
+| ---               | ---                                                                   |
+| `PROCESSING`      | NO                                                                    |
+| `REJECTED`        | NO                                                                    |
+| `CANCELLED`       | NO                                                                    |
+| `READY`           | YES (* available only when `Application.stateReason = READY_TO_SHIP`) |
 
 If the request was successfully processed, you receive HTTP status code 200 and object of information about changed *order* plus basic information about respective *application* (ID, state, substate) with at least following information in the response:
 - Order number
@@ -959,27 +582,22 @@ If the request was successfully processed, you receive HTTP status code 200 and 
   - Application substate
 
 In other cases, you receive one of the following errors:
-| Status code | Code | Message |
-| --- | --- | --- |
-| 400 | INVALID_REQUEST       | *Various messages possible* |
-| 404 | OBJECT_NOT_FOUND      | *Various messages possible* |
-| 422 | NOT_SUPPORTED | CZ: Not supported for the financing type INSTALLMENT. Contact Home Credit: (CZ) smlouvy@homecredit.cz or +420 541 598 598, (SK) kompletace@homecredit.cz or +421 337 767 157 |
-| 500 | INTERNAL_SERVER_ERROR | *Various messages possible* |
+| Status code | Code                  | Explanation                                                                      |
+| ---         | ---                   | ---                                                                              |
+| 400         | INVALID_REQUEST       | Request was not well formatted (malformed request syntax, size too large, etc.)  |
+| 404         | OBJECT_NOT_FOUND      | The requested resource could not be found                                        |
+| 422         | NOT_SUPPORTED         | Resource is not in supported state (substate)                                    |
+| 500         | INTERNAL_SERVER_ERROR | Unexpected condition was encountered and no more specific message is suitable    |
+
 
 + Parameters
-    + applicationId (string, required, `02-11b00a1ef1`)
+    + applicationId (string, required, `01-11b00a1ef1`)
 
 
-### Mark order items as delivered [PUT]
-Mark order items as delivered.
+### Mark order as delivered [PUT]
+Mark order as delivered.
 
-System notification. Some or all order items were delivered to customer.
-Based on *application* financing type and partner setting, application payment may be processed.
-
-
-+ Request (application/json; charset=utf-8)
-    + Attributes (OrderItemsDeliverRequest)
-
+System notification. The whole order was delivered to the customer. Based on partner's settings, application payment may be processed.
 
 + Response 200(application/json; charset=utf-8)
         Order items or whole order is marked as delivered
@@ -993,172 +611,12 @@ Based on *application* financing type and partner setting, application payment m
     + Attributes (Errors)
 
 
-## Mark order items as returned [/financing/v1/applications/{applicationId}/order/return]
-When some or all order items were returned by the customer to you, use `/financing/v1/applications/{applicationId}/order/return` resource where `{applicationId}` is the application ID you received in the response of `/financing/v1/applications` after its creation.
+## Orders [/financing/v1/orders{?applicationId}]
+If you need to find out current information about particular *order* - primarily its state and other details - use `/financing/v1/orders{?applicationId}` resource where `{applicationId}` is the *application* ID you received in the response of `/financing/v1/applications` after its creation.
 
 | Financing type     | Supported |
 | ---                | ---       |
-| `INSTALLMENT`      | NO        |
-| `TRY_AND_PAY`      | YES       |
-| `DEFERRED_PAYMENT` | YES       |
-| `SUBSCRIPTION`     | NO        |
-
-| Application state | Availability |
-| ---               | ---          |
-| `PROCESSING`      | NO           |
-| `REJECTED`        | NO           |
-| `CANCELLED`       | NO           |
-| `READY`           | YES          |
-
-Use `/financing/v1/applications/{applicationId}/order/return` resource with an empty request to mark all order items (the whole *order*) as returned at once.
-
-> * TIP: Use an empty request if marking last item(s) on order as returned.
-
-If you want to mark specific order item/s as returned, use `/financing/v1/applications/{applicationId}/order/return` resource with properly filled request that contains returned order items info. In this case request should contain at least following data:
-- Order items (array of returned order items)
-  - *one or more particular order item identificators (`code`/`EAN`/`name`)* - `code`, `ean` and `name` is used for identifying order item sent in `Create application`.
-
-> * **ATTENTION:** If multiple properties (`code`, `ean` or `name`) are used for identifying some order item, it all must exact match the item data.
-
-If the request was successfully processed, you receive HTTP status code 200 and object of information about changed *order* plus basic information about respective *application* (ID, state, substate) with at least following information in the response:
-- Order number
-- Order total price (including VAT)
-- Order total VAT (array of VAT amounts split by VAT rates)
-- Addresses (array)
-  - Country
-  - City
-  - Street
-  - Street number
-  - ZIP
-  - Address type
-- Order items (array)
-  - Order item name
-  - Total price (all pieces, including VAT)
-  - Total VAT
-  - Order item state
-- Order state
-- Application basic information
-  - ID
-  - Application state
-  - Application substate
-
-In other cases, you receive one of the following errors:
-| Status code | Code | Message |
-| --- | --- | --- |
-| 400 | INVALID_REQUEST       | *Various messages possible* |
-| 404 | OBJECT_NOT_FOUND      | *Various messages possible* |
-| 422 | NOT_SUPPORTED | CZ: Not supported for the financing type INSTALLMENT. Contact Home Credit: (CZ) smlouvy@homecredit.cz or +420 541 598 598, (SK) kompletace@homecredit.cz or +421 337 767 157 |
-| 500 | INTERNAL_SERVER_ERROR | *Various messages possible* |
-
-+ Parameters
-    + applicationId (string, required, `02-11b00a1ef1`)
-
-
-### Mark order items as returned [PUT]
-Mark order items as returned.
-
-System notification. Some or all order items were returned by customer back to e-shop.
-Based on *application* financing type and partner setting, credit note may be issued.
-
-
-+ Request (application/json; charset=utf-8)
-    + Attributes (OrderItemsReturnRequest)
-
-
-+ Response 200(application/json; charset=utf-8)
-        Order items or whole order is marked as returned
-
-    + Attributes (OrderExtended)
-
-
-+ Response 422(application/json; charset=utf-8)
-        State change can not be processed
-
-    + Attributes (Errors)
-
-
-## Applications payments  [/financing/v1/applications/{applicationId}/payments]
-
-+ Parameters
-    + applicationId (string, required, `02-11b00a1ef1`)
-
-
-### Get payments on specific application [GET]
-Get payments on specific *application*
-
-List of realized payments from HC to partner. In case of recurring payment, list may contain more items.
-
-feature | supported by resource
---- | ---
-[paging](#header-paging) | yes
-[sorting](#header-sorting) | no
-[filtering](#header-filtering) | no
-
-This resource supports [paging](#header-paging). As a value to `before` and `after` parameters, use `paymentId` attribute.
-
-Collection is sorted by paymentId attribute.
-
-+ Response 200(application/json; charset=utf-8)
-        List of payments. May be empty if no payment was processed yet.
-
-    + Attributes (object)
-        + data (array[Payment], fixed-type, required)
-        + pagingInfo (PagingInfo, optional)
-
-
-+ Response 404(application/json; charset=utf-8)
-
-        Application does not exist
-
-    + Attributes (Errors)
-
-
-## Invoices [/financing/v1/invoices]
-
-### Generate invoice info [POST]
-Generates billing information to be included in invoice for specific date for specific order or delivery.
-This should be used by partner before issuing an invoice, to include correct billing information.
-
-| Financing type     | Supported |
-| ---                | ---       |
-| `INSTALLMENT`      | NO |
-| `TRY_AND_PAY`      | YES  |
-| `DEFERRED_PAYMENT` | YES  |
-| `SUBSCRIPTION`     | YES  |
-
-| Application state | Availability |
-| ---               | ---          |
-| `PROCESSING`      | NO           |
-| `REJECTED`        | NO           |
-| `CANCELLED`       | NO           |
-| `READY`           | YES          |
-
-+ Request
-    + Attributes (InvoiceInfoRequest)
-
-+ Response 200(application/json; charset=utf-8)
-
-        Invoice info
-
-    + Attributes (InvoiceInfo)
-
-
-+ Response 404(application/json; charset=utf-8)
-
-        Invoice info can not be generated
-
-    + Attributes (Errors)
-
-
-## Orders [/financing/v1/orders{?orderNumber,orderVariableSymbol,applicationId}]
-If you need to find out current information about particular *order* - primarily its state (or its order items' states) and other details - use `/financing/v1/orders{?orderNumber,orderVariableSymbol,applicationId}` resource where `{applicationId}` is the application ID you received in the response of `/financing/v1/applications` after its creation, `{orderNumber}` is your order's number and `{orderVariableSymbol}` is your order's variable symbol.
-
-| Financing type     | Supported |
-| ---                | ---       |
-| `INSTALLMENT`      | YES* (see the [parameters restriction bellow](#orders-parameters-restriction)) |
-| `TRY_AND_PAY`      | YES |
-| `DEFERRED_PAYMENT` | YES |
-| `SUBSCRIPTION`     | NO |
+| `INSTALLMENT`      | YES       |
 
 | Application state | Availability |
 | ---               | ---          |
@@ -1191,28 +649,19 @@ If the request was successfully processed, you receive HTTP status code 200 and 
   - Application substate
 
 In other cases, you receive one of the following errors:
-| Status code | Code | Message |
-| --- | --- | --- |
-| 404 | OBJECT_NOT_FOUND      | *Various messages possible* |
-| 422 | UNPROCESSABLE         | *Various messages possible* |
-| 500 | INTERNAL_SERVER_ERROR | *Various messages possible* |
+| Status code | Code                  | Explanation                                                                      |
+| ---         | ---                   | ---                                                                              |
+| 404         | OBJECT_NOT_FOUND      | The requested resource could not be found                                        |
+| 422         | UNPROCESSABLE         | The request was well-formed but was unable to be followed due to semantic errors |
+| 500         | INTERNAL_SERVER_ERROR | Unexpected condition was encountered and no more specific message is suitable    |
+
+
++ Parameters
+    + applicationId: `01-11b00a1ef1` (string, optional) - Application ID
 
 
 ### Get order [GET]
 Search for *order* using specified parameters.
-
-use `/financing/v1/orders` with at least one of following parameter:
-- variable symbol,
-- order number,
-- application number.
-
-<a name="orders-parameters-restriction"></a>
-> **ATTENTION:** At this moment, only `applicationId` is valid parametr for order processing within application of financing type `INSTALLMENT`.
-
-+ Parameters
-    + orderNumber (string, optional, `1234567890`) Order number
-    + orderVariableSymbol (string, optional, `1234567890`) Order variable symbol
-    + applicationId (string, optional, `02-11b00a1ef1`) Application ID
 
 + Response 200(application/json; charset=utf-8)
 
@@ -1235,7 +684,7 @@ When a customer wants to pay for a purchase by a loan and you want to provide hi
 - `/financing/v1/installmentPrograms` - to find out details of a chosen installment program
 - `/financing/v1/installmentProgramsDownPayments` - to find out down payment options within available installment programs offers
 
-> NOTE: Implementation of installment calculator is optional, customers can always use the installment calculator embedded in Home Credit's front end
+> NOTE: Implementation of installment calculator is optional, customers can always use the installment calculator embedded in Home Credit's front-end
 
 
 ## Installment programs offers [/financing/v1/installmentProgramsOffers]
@@ -1251,11 +700,11 @@ If the request was successfully processed, you receive HTTP status code 200 and 
   - Number of installments
 
 In other cases, you receive one of the following errors:
-| Status code | Code | Message |
-| --- | --- | --- |
-| 400 | INVALID_REQUEST       | *Various messages possible* |
-| 422 | UNPROCESSABLE         | *Various messages possible* |
-| 500 | INTERNAL_SERVER_ERROR | *Various messages possible* |
+| Status code | Code                  | Explanation                                                                      |
+| ---         | ---                   | ---                                                                              |
+| 400         | INVALID_REQUEST       | Request was not well formatted (malformed request syntax, size too large, etc.)  |
+| 422         | UNPROCESSABLE         | The request was well-formed but was unable to be followed due to semantic errors |
+| 500         | INTERNAL_SERVER_ERROR | Unexpected condition was encountered and no more specific message is suitable    |
 
 
 ### Calculate installment programs offer  [POST]
@@ -1295,11 +744,11 @@ If the request was successfully processed, you receive HTTP status code 200 and 
 - Installment program details
 
 In other cases, you receive one of the following errors:
-| Status code | Code | Message |
-| --- | --- | --- |
-| 400 | INVALID_REQUEST       | *Various messages possible* |
-| 422 | UNPROCESSABLE         | *Various messages possible* |
-| 500 | INTERNAL_SERVER_ERROR | *Various messages possible* |
+| Status code | Code                  | Explanation                                                                      |
+| ---         | ---                   | ---                                                                              |
+| 400         | INVALID_REQUEST       | Request was not well formatted (malformed request syntax, size too large, etc.)  |
+| 422         | UNPROCESSABLE         | The request was well-formed but was unable to be followed due to semantic errors |
+| 500         | INTERNAL_SERVER_ERROR | Unexpected condition was encountered and no more specific message is suitable    |
 
 
 ### Calculate installment program detail [POST]
@@ -1336,11 +785,11 @@ If the request was successfully processed, you receive HTTP status code 200 and 
 - Step between given minimum and maximum down payment amounts
 
 In other cases, you receive one of the following errors:
-| Status code | Code | Message |
-| --- | --- | --- |
-| 400 | INVALID_REQUEST       | *Various messages possible* |
-| 422 | UNPROCESSABLE         | *Various messages possible* |
-| 500 | INTERNAL_SERVER_ERROR | *Various messages possible* |
+| Status code | Code                  | Explanation                                                                      |
+| ---         | ---                   | ---                                                                              |
+| 400         | INVALID_REQUEST       | Request was not well formatted (malformed request syntax, size too large, etc.)  |
+| 422         | UNPROCESSABLE         | The request was well-formed but was unable to be followed due to semantic errors |
+| 500         | INTERNAL_SERVER_ERROR | Unexpected condition was encountered and no more specific message is suitable    |
 
 
 ### Calculate installment programs down payments [POST]
@@ -1362,69 +811,11 @@ Calculate installment programs down payments according to specified input
 
     + Attributes (Errors)
 
-# Group Precheck operations
-Services that allow partner e-shops find out a probability of *application's* approval and limits of particular customer, if known to HC
-
-
-## Precheck [/financing/v1/precheck]
-Precheck *application*
-
-Returns probability of *application's* approval and limits of particular customer, if known to HC
-
-It has to be called with valid access token (see the [Security section](#reference/security)) from your server. If you plan to integrate it in client flow, you should implement REST endpoint bound to your shopping basket session, that will be used as a proxy to call HC API - **NEVER put access token directly to client side**.
-
-Possible error codes explanation:
-| Error status code | Code | Explanation |
-| ---               | ---  | ---         |
-| 400 | INVALID_REQUEST       | *Various messages possible* |
-| 422 | PERSONAL_ID_INVALID   | PersonalId is not valid     |
-| 500 | FAILURE               | Internal failure            |
-
-### Precheck [POST]
-Returns probability of *application's* approval and limits of particular customer, if known to HC
-
-+ Request (application/json; charset=utf-8)
-    + Attributes (PrecheckRequest)
-
-
-+ Response 200(application/json; charset=utf-8)
-
-        Probability of approval
-
-    + Attributes (PrecheckResults)
-
-
-+ Response 400(application/json; charset=utf-8)
-        Error in processing request
-
-    + Attributes (Errors)
-
 
 # Group Merchantsite operations
 Services that should be developed and exposed by partner e-shops to allow HC asynchronously inform these partner e-shops about important changes regarding particular *applications* and *orders*
 
 > **ATTENTION:** This set of APIs is NOT exposed from HC. Instead, it should be developed by partner and accept calls specified below.
-
-## Order change request [/financing/v1/{application.merchantUrls.changeEndpoint}]
-Order change request
-
-We use this resource when there is need to correct *order* data (billing information, order items etc.) stored at your side.
-
-### Order change request [POST]
-Order change request
-
-+ Request (application/json; charset=utf-8)
-    + Attributes (OrderChangeNotification)
-
-+ Response 200 (application/json; charset=utf-8)
-
-        {
-            "status": "OK"
-        }
-
-+ Response 400 (application/json; charset=utf-8)
-
-        Can not process changes
 
 
 ## Application notification [/financing/v1/{application.merchantUrls.notificationEndpoint}]
@@ -1451,25 +842,6 @@ Notify partner about changes in application.
 
 + Request (application/json; charset=utf-8)
     + Attributes (ApplicationBase)
-
-
-+ Response 200 (application/json; charset=utf-8)
-
-         {
-            "status": "OK"
-         }
-
-+ Response 400 (application/json; charset=utf-8)
-
-        Can not process changes
-
-## Payment notification [/financing/v1/{application.merchantUrls.paymentEndpoint}]
-
-### Payment notification [POST]
-Notification about new payment.
-
-+ Request (application/json; charset=utf-8)
-    + Attributes (Payment)
 
 
 + Response 200 (application/json; charset=utf-8)
@@ -1637,16 +1009,12 @@ Financing application base information
     + `REJECTED` - Application was rejected
     + `CANCELLED` - Application was cancelled by client, either before approval or after delivery
 + `stateReason`: `PROCESSING_APPROVED` (enum, required) - Describes internal state of application, e.g. when state is PROCESSING - reason why application remains in processing state
-    + `PROCESSING_ADDITIONAL_DATA` - Additional data needed (redirect to HC or send Application additional data)
-    + `PROCESSING_VERIFICATION` - Verification needed (redirect to HC or send Application verification)
-    + `PROCESSING_VALIDATION_IN_PROGRESS` - Customer data is being validated.
     + `PROCESSING_REDIRECT_NEEDED` - Redirect to HC is needed. Redirect user to `gatewayRedirectUrl`.
     + `PROCESSING_NEW` - New application created
     + `PROCESSING_PREAPPROVED` - Preliminary approval by HC
     + `REJECTED` - Rejected by HC
     + `PROCESSING_APPROVED` - Approved by HC, to be signed by client
     + `PROCESSING_REVIEW` - Manual review by HC in progress
-    + `PROCESSING_WAIT_CLIENT` - To be completed by client
     + `PROCESSING_ALT_OFFER` - Alternative offered to client
     + `PROCESSING_SIGNED` - Signed by client, to verification by HC
     + `CANCELLED_NOT_PAID` - Cancelled before delivery
@@ -1655,7 +1023,6 @@ Financing application base information
     + `READY_DELIVERING` - Verification of goods delivery
     + `READY_DELIVERED` - Goods delivered to client
     + `READY_PAID` - Paid to merchant
-    + `CANCELLED_TO_RETURN` - Cancelled after delivery, goods to be returned (not implemented)
     + `CANCELLED_RETURNED` - Cancelled after delivery, goods returned to merchant
 
 
@@ -1666,31 +1033,15 @@ Financing application
 + `customer` (Customer, optional) - Customer data
 + `order` (Order, optional) - Order data
 + `type` (enum, optional) - Financing type
-    + `DEFERRED_PAYMENT` - Pay later ("zaplať později")
-    + `TRY_AND_PAY` - Customer pay after he tries the goods. ("vyzkoušej a zaplať")
     + `INSTALLMENT` - Pay in monthly installments ("nákup na splátky")
-    + `SUBSCRIPTION` - Recurring payment ("předplatné, nebo opakovaná platba")
-+ One Of
-    - `settingsDeferredPayment` - Settings for DEFERRED_PAYMENT Application type.
-        + `revolvingPreferred`: true (boolean, optional) - Flag if customer prefers to create revolving contract.
-    - `settingsTryAndPayPayment` - Settings for TRY_AND_PAY Application type.
-        + `revolvingPreferred`: true (boolean, optional) - Flag if customer prefers to create revolving contract.
-    - `settingsInstallment` - Settings for INSTALLMENT Application type.
-        + `preferredMonths`: 10 (number, optional) - Preferred number of installments (in months)
-        + `preferredInstallment` (Amount, optional) - Preferred repayment amount
-        + `preferredDownPayment` (Amount, optional) - Preferred downpayment amount (amount should be rounded to hundreds)
-        + `productCode`: `a122ax` (string, optional) - Product code, this indicates previous calculation result
-        + `productSetCode`: `bc11523` (string, optional) - Product set code, this will limit further calculations
-    - `settingsSubscription` - Properties Settings for SUBSCRIPTION Application type.
-        + `paymentFrequency` (enum, optional) - payment frequency for recurring payment
-            + `WEEKLY` - Payment with weekly frequency. Repeated every week at the same day as set in subscriptionPaymentFirstDate.
-            + `MONTHLY` - Payment with monthly frequency. Repeated every month at the same day as set in subscriptionPaymentFirstDate.
-            + `QUARTERLY` - Payment with quarterly frequency. Repeated every 3 months at the same day as set in subscriptionPaymentFirstDate.
-        + `paymentFirstDate`: `2016-10-12` (string, optional) - First payment date for recurring payment
++ `settingsInstallment` (object, required) - Settings for INSTALLMENT Application type.
+    + `preferredMonths`: 10 (number, optional) - Preferred number of installments (in months)
+    + `preferredInstallment` (Amount, optional) - Preferred repayment amount
+    + `preferredDownPayment` (Amount, optional) - Preferred downpayment amount (amount should be rounded to hundreds)
+    + `productCode`: `a122ax` (string, optional) - Product code, this indicates previous calculation result
+    + `productSetCode`: `bc11523` (string, optional) - Product set code, this will limit further calculations
 + `agreementPersonalDataProcessing`: `true` (boolean, optional) - Flag indicating already approved personal data processing
 + `agreementTermsAndConditions`: `true` (boolean, optional) - Flag indicating already approved terms and conditions
-+ `additionalData` (array[string], optional) - List of additional data that customer has to add to complete the application if stateReason is `PROCESSING_ADDITIONAL_DATA`.
-    Possible values in array: `PERSONAL_ID`, `ID_CARD_NO`, `ID_CARD_EXPIRY_DATE`, `ID_CARD_SCAN`.
 + `gatewayRedirectUrl` (string, required) - Gateway redirect URL. Redirect user to this URL if state is `PROCESSING` and stateReason is `PROCESSING_ADDITIONAL_DATA` or `PROCESSING_VERIFICATION` or `PROCESSING_REDIRECT_NEEDED`.
 
 
@@ -1750,36 +1101,6 @@ Customer data
 + `cartItemsRemoved`: 2 (number, optional) - Total count of removed items form shopping basket during current shopping
 + `itemsViewed`: 10 (number, optional) - Number of viewed pages with products
 
-## OrderChangeRequest (object)
-Object used to change order information.
-
-### Properties
-+ reason (string, optional) - Reason of change.
-+ order (OrderChange, required) - Changed order data.
-
-## OrderChange (object)
-+ `number`: `AA234` (string, optional) - Order number (internal for e-shop)
-+ `variableSymbols` (array[string], optional) - Variable symbols (internal for e-shop)
-+ `totalPrice` (Amount, optional) - Total order amount, including VAT
-+ `totalVat` (array[VatAmount], optional) - Total VAT amounts split by their VAT rates
-+ `addresses` (array[Address], optional) - Addresses. Only `BILLING` and `DELIVERY` types are allowed.
-+ `deliveryType` (enum, optional) - Delivery type, for `DELIVERY_CARRIER` type can be further specified by `deliveryCarrier` attribute.
-    + `DELIVERY_CARRIER` - If delivered by carrier - use `deliveryCarrier` for further specification.
-    + `PERSONAL_BRANCH` - Personal collection at branch
-    + `PERSONAL_PARTNER` - Personal collection at partner network
-    + `ONLINE` - Online delivery (e.g. for intangible assets)
-+ `deliveryCarrier` (DeliveryCarrier, optional) - Delivery carrier, when applicable.
-+ `reservationDate`: `2017-07-15T00:00:00+02:00` (string, optional)
-
-   Date and time until order is reserved.
-
-   Until 'reservationDate' HCO will try to notify partner with Application notification about approval or rejection.
-
-   After this date and time, e-shop does not guarantee items availability (if application processing is longer, it may endanger order fullfillment).
-
-+ `items` (array[ApplicationRequestOrderItem], optional) - Order items
-+ `documents` (array[Document], optional) - Attached documents (invoices etc.)
-
 
 ## ApplicationCancelRequest (object)
 Specification of the reason why the application is cancelled.
@@ -1796,40 +1117,6 @@ Specification of the reason why the application is cancelled.
     + `APPLICATION_CANCELLED_OTHER` - Other reason - specified in `customReason`
 + `customReason` (string, optional) - Specification of `APPLICATION_CANCELLED_OTHER` reason
 
-## OrderItemsChangeRequest (object)
-Object used to change order items.
-
-### Properties
-+ `items` (array[OrderItemChangeRequest], optional) - List of changed items. All items are considered when empty.
-    > * ATTENTION: Ignored if marking order items as sent or delivered (HCO currently can't handle partial delivery).
-+ `totalPrice` (Amount, optional) - Total amount of items (from orderItems array), including VAT.
-+ `totalVat` (array[VatAmount], optional) - Total VAT amounts of items (from orderItems array) split by their VAT rates.
-
-## OrderItemsReturnRequest (OrderItemsChangeRequest)
-Object used to mark order items as returned.
-
-### Properties
-+ `document` (Document, optional) - Attached document (credit note, ...)
-+ `variableSymbol`: `1234567890` (string, optional) - Variable symbol of the new document (credit note, ...)
-
-## OrderItemsSendRequest (OrderItemsChangeRequest)
-Object used to mark order items as sent.
-
-### Properties
-+ `document` (Document, optional) - Attached invoice (invoice, proforma invoice...)
-+ `variableSymbol`: `1234567890` (string, optional) - Variable symbol of the new document (invoice, proforma invoice, ...)
-+ `sentDate`: `2017-01-12T00:00:00+02:00` (string, optional) - Shipping date and time (fill just the date if you can't specify a shipping time)
-+ `deliveryCarrier` (DeliveryCarrier, optional) - Carrier
-+ `deliveryTrackingNumber`: `EEX1221` (string, optional) - Delivery tracking number
-
-## OrderItemsDeliverRequest (OrderItemsSendRequest)
-Object used to mark order items as delivered.
-
-### Properties
-+ `deliveryDate`: `2017-01-15T00:00:00+02:00` (string, optional) - Delivery date and time (fill just the date if you can't specify a time of delivery)
-
-## OrderItemsCancelRequest (OrderItemsChangeRequest)
-Object used to mark order items as cancelled.
 
 ## OrderBase (object)
 Order information, needed to create an application.
@@ -1930,16 +1217,6 @@ Order item information.
 + `deliveryTrackingNumber`: `EX21121` (string, optional) - Tracking number for the item. Only when the whole order was NOT sent at once.
 
 
-## OrderItemChangeRequest (object)
-Order item base information
-
-### Properties
-+ `code`: `EXC4677-1a` (string, optional) - Internal code for item (internal to e-shop). Used to better identify the item for future changes
-+ `ean`: 888462064002 (string, optional) - EAN code.
-+ `name`: `iPhone 6s 32GB SpaceGray` (string, optional) - Item name
-+ `quantity`: 1 (number, optional) - Item quantity. If empty, considered as 1.
-
-
 ## File (object)
 
 ### Properties
@@ -1968,28 +1245,6 @@ Attached document (e.g. invoice, credit note etc.)
 ### Properties
 + `variableSymbol`: `1234567890` (string, optional) - variable symbol (internal for e-shop)
 
-
-## InvoiceInfo (object)
-Billing information, to be included in invoice.
-
-### Properties
-+ `fullName`: `Ing. Jan Novák, Csc.` (string, optional) - Customer full name, including academical degrees and salutation (Mr./Mrs./..). Empty if requested via customerDueDateCategory.
-+ `address` (Address, optional) - Billing address. Empty if requested via customerDueDateCategory.
-+ `dueDate`: `2017-06-20` (string, required) - Invoice due date.
-+ `accountNumber` (AccountNumber, required) - Invoice account number.
-
-## InvoiceInfoRequest (object)
-Request for generating invoice info.
-
-### Properties
-+ One of
-    + `customerDueDateCategory` (enum, optional) - Category of the due date. See [Precheck method](#reference/precheck-operations/precheck) response or [Get application](#reference/application-operations/application-detail) response.
-        + `CATEGORY_CLASSIC` - Customer with classic due date (14 days, with the exception of events (Christmas, etc.))
-        + `CATEGORY_EXTENDED` - Customer with extended due date (20th day of next month, with the exception of events (Christmas, etc.))
-    + `orderNumber`: `12345678` (string, optional) - Order number.
-    + `orderVariableSymbol`: `12345678` (string, optional) - Variable symbol.
-    + `applicationId`: `02-11200a0ee1` (string, optional) - Application identifier.
-+ `billingDate`: `2017-06-20` (string, optional) - Date of issuing an invoice. Default value: today.
 
 ## AccountNumber (object)
 Account number with bank code.
@@ -2063,25 +1318,6 @@ Down payments information - the lowest down payment possible, the maximum down p
     0, 500, 1000, 1500, 2000, 2500
 
 
-## Limits (object)
-Customer's limits
-
-### Properties
-+ `availableLimit` (Amount, required) - Customer's available limit
-+ `totalLimit` (Amount, required) - Customer's global limit
-
-
-## Payment (object)
-Payment information
-
-### Properties
-+ `paymentId`: `1a12` (string, required) - unique payment identifier
-+ `date`: `2017-05-20` (string, required) - Payment date
-+ `applicationId`: `02-11200a0ee1` (string, required) - Application ID that this payment belongs to
-+ `value` (Amount, required) - Payment amount
-+ `variableSymbol`: `1234567890` (string, optional) - Payment variable symbol
-+ `invoice` (InvoiceInfo, optional) - Invoice data.
-
 ## MerchantUrls (object)
 Collection of URLs used for redirection of a customer back to a partner website or as a notification endpoint
 
@@ -2100,57 +1336,16 @@ Financing application request
 + `customer` (ApplicationRequestCustomer, required) - Customer information
 + `order` (OrderBase, required) - Order information
 + `type` (enum, required) - Financing type
-    + `DEFERRED_PAYMENT` - Pay later ("zaplať později")
-    + `TRY_AND_PAY` - Customer pay after he tries the goods. ("vyzkoušej a zaplať")
     + `INSTALLMENT` - Pay in monthly installments ("nákup na splátky")
-    + `SUBSCRIPTION` - Recurring payment ("předplatné, nebo opakovaná platba")
-+ One Of
-    - `settingsDeferredPayment` - Settings for DEFERRED_PAYMENT Application type.
-        + `revolvingPreferred`: true (boolean, optional) - Flag if customer prefers to create revolving contract.
-    - `settingsTryAndPayPayment` - Settings for TRY_AND_PAY Application type.
-        + `revolvingPreferred`: true (boolean, optional) - Flag if customer prefers to create revolving contract.
-    - `settingsInstallment` - Settings for INSTALLMENT Application type.
-        + `preferredMonths`: 10 (number, optional) - Preferred number of installments (in months)
-        + `preferredInstallment` (Amount, optional) - Preferred repayment amount
-        + `preferredDownPayment` (Amount, optional) - Preferred downpayment amount (amount should be rounded to hundreds)
-        + `productCode`: `a122ax` (string, optional) - Product code, this indicates previous calculation result
-        + `productSetCode`: `bc11523` (string, optional) - Product set code, this will limit further calculations
-    - `settingsSubscription` - Properties Settings for SUBSCRIPTION Application type.
-        + `paymentFrequency` (enum, optional) - payment frequency for recurring payment
-            + `WEEKLY` - Payment with weekly frequency. Repeated every week at the same day as set in subscriptionPaymentFirstDate.
-            + `MONTHLY` - Payment with monthly frequency. Repeated every month at the same day as set in subscriptionPaymentFirstDate.
-            + `QUARTERLY` - Payment with quarterly frequency. Repeated every 3 months at the same day as set in subscriptionPaymentFirstDate.
-        + `paymentFirstDate`: `2016-10-12` (string, optional) - first payment date for recurring payment
-+ `agreementPersonalDataProcessing`: `true` (boolean, required) - Personal data processing agreement
++ `settingsInstallment` (object, required) - Settings for INSTALLMENT Application type.
+    + `preferredMonths`: 10 (number, optional) - Preferred number of installments (in months)
+    + `preferredInstallment` (Amount, optional) - Preferred repayment amount
+    + `preferredDownPayment` (Amount, optional) - Preferred downpayment amount (amount should be rounded to hundreds)
+    + `productCode`: `a122ax` (string, optional) - Product code, this indicates previous calculation result
+    + `productSetCode`: `bc11523` (string, optional) - Product set code, this will limit further calculations
++ `agreementPersonalDataProcessing`: `true` (boolean, optional) - Personal data processing agreement
 + `agreementTermsAndConditions`: `true` (boolean, optional) - Terms and conditions agreement
-+ `precheckIds` (array[string], optional) - Array of all precheck ids related to this application. See [Precheck operation](#reference/precheck-operations/precheck) and it's response (PrecheckResults).
 + `merchantUrls` (MerchantUrls, required) - Collection of partner's URLs used for redirection of a customer back to a partner website or as a notification endpoint
-
-## RequestApplicationOTPRequest (object)
-+ `ipAddress`: `172.10.10.1` (string, optional) - IPv4 or IPv6 address of a customer. Required for `DEFFERED_PAYMENT` and `TRY_AND_PAY` with `revolving` ("Odklad na RU").
-
-## RequestApplicationOTPResponse (object)
-+ `phone`: `+420123****89` (string, required) - OTP SMS was sent on this phone number. Number is obfuscated.
-
-## VerifyRequest (object)
-+ `otp`: `123456` (string, required)
-+ `ipAddress`: `172.10.10.1` (string, optional) - IPv4 or IPv6 address of a customer. Required for `DEFFERED_PAYMENT` and `TRY_AND_PAY` with `revolving` ("Odklad na RU").
-
-
-## AdditionalDataRequest (object)
-Additional data about the customer.
-
-### Properties
-+ `personalId`: 7203201234 (string, optional) - Personal identification number (format XXXXXXYYYY or XXXXXX/YYYY)
-+ `idCard`: 123456789 (string, optional) - ID card number
-+ `idCardExpiryDate`: `2020-05-19` (string, optional) - ID card expiration date
-+ `idCardScan` (IdCardScan, optional) - ID card scan
-
-## IdCardScan (object)
-
-### Properties
-+ `front` (File, optional) - Front side
-+ `back` (File, optional) - Back side
 
 
 ## InstallmentProgramsRequest (object)
@@ -2176,147 +1371,12 @@ Additional data about the customer.
 + `price` (Amount, required) - Goods price
 
 
-## PrecheckRequest (object)
-Precheck data (has similar structure as `Application`).
-
-### Properties
-+ `customer` (PrecheckRequestCustomer, optional) - Customer data
-+ `order` (PrecheckRequestOrder, optional) - Order data
-+ `agreementPersonalDataProcessing`: `true` (boolean, optional) - Flag indicating already approved personal data processing
-+ `type` (enum, optional) - Financing type
-    + `DEFERRED_PAYMENT` - Pay later ("zaplať později")
-    + `TRY_AND_PAY` - Customer pay after he tries the goods. ("vyzkoušej a zaplať")
-    + `INSTALLMENT` - Pay in monthly installments ("nákup na splátky")
-    + `SUBSCRIPTION` - Recurring payment ("předplatné, nebo opakovaná platba")
-+ One Of
-    - `settingsDeferredPayment` - Settings for DEFERRED_PAYMENT Application type.
-        + `revolvingPreferred`: true (boolean, optional) - Flag if customer prefers to create revolving contract.
-    - `settingsTryAndPayPayment` - Settings for TRY_AND_PAY Application type.
-        + `revolvingPreferred`: true (boolean, optional) - Flag if customer prefers to create revolving contract.
-    - `settingsInstallment` - Settings for INSTALLMENT Application type.
-        + `preferredMonths`: 10 (number, optional) - Preferred number of installments (in months)
-        + `preferredInstallment` (Amount, optional) - Preferred repayment amount
-        + `preferredDownPayment` (Amount, optional) - Preferred downpayment amount (amount should be rounded to hundreds)
-        + `productCode`: `a122ax` (string, optional) - Product code, this indicates previous calculation result
-        + `productSetCode`: `bc11523` (string, optional) - Product set code, this will limit further calculations
-    - `settingsSubscription` - Properties Settings for SUBSCRIPTION Application type.
-        + `paymentFrequency` (enum, optional) - payment frequency for recurring payment
-            + `WEEKLY` - Payment with weekly frequency. Repeated every week at the same day as set in subscriptionPaymentFirstDate.
-            + `MONTHLY` - Payment with monthly frequency. Repeated every month at the same day as set in subscriptionPaymentFirstDate.
-            + `QUARTERLY` - Payment with quarterly frequency. Repeated every 3 months at the same day as set in subscriptionPaymentFirstDate.
-        + `paymentFirstDate`: `2016-10-12` (string, optional) - First payment date for recurring payment
-
-## PrecheckRequestCustomer (ApplicationRequestCustomer)
-+ `additionalData` (AdditionalDataRequest, optional) - Additional data about the customer
-
-## PrecheckRequestOrder (object)
-Order information, needed to create an application.
-
-### Properties
-+ `number`: `AA234` (string, optional) - Order number (internal for e-shop)
-+ `variableSymbols` (array[string], optional) - Variable symbols (internal for e-shop)
-+ `totalPrice` (Amount, optional) - Total order amount, including VAT
-+ `totalVat` (array[VatAmount], optional) - Total VAT amounts split by their VAT rates
-+ `addresses` (array[Address], optional) - Addresses. Only `BILLING` and `DELIVERY` types are allowed.
-+ `deliveryType` (enum, optional) - Delivery type, for `DELIVERY_CARRIER` type can be further specified by `deliveryCarrier` attribute.
-    + `DELIVERY_CARRIER` - If delivered by carrier - use `deliveryCarrier` for further specification.
-    + `PERSONAL_BRANCH` - Personal collection at branch
-    + `PERSONAL_PARTNER` - Personal collection at partner network
-    + `ONLINE` - Online delivery (e.g. for intangible assets)
-+ `deliveryCarrier` (DeliveryCarrier, optional) - Delivery carrier, when applicable.
-+ `reservationDate`: `2017-07-15T00:00:00+02:00` (string, optional)
-
-   Date and time until order is reserved.
-
-   Until 'reservationDate' HCO will try to notify partner with Application notification about approval or rejection.
-
-   After this date and time, e-shop does not guarantee items availability (if application processing is longer, it may endanger order fullfillment).
-+ `items` (array[ApplicationRequestOrderItem], optional) - Order items
-+ `documents` (array[Document], optional) - Attached documents (invoices etc.)
-
-
 ## KeyValue (object)
 
 ### Properties
 + `key`: `property` (string, required) - Key
 + `value`: `value` (object, required) - Value
 
-## PrecheckResult (object)
-Precheck result.
-
-### Properties
-+ `type` (enum, required) - Precheck result type for Funding type.
-    + `DEFERRED_PAYMENT` - Pay later ("zaplať později")
-    + `TRY_AND_PAY` - Customer pay after he tries the goods. ("vyzkoušej a zaplať")
-    + `INSTALLMENT` - Pay in monthly installments ("nákup na splátky")
-    + `SUBSCRIPTION` - Recurring payment ("předplatné, nebo opakovaná platba")
-+ `recommendation` (boolean, required) - A recommendation of whether the order should be passed to the HCO.
-    true = Application is going to be likely approved.
-    false = Application is going to be likely rejected.
-+ `probabilityOfApproval` (number, required) - Probability of approval.
-    0 = 0% to be approved
-    1 = 100% to be approved
-
-    Partner can create custom logic not to follow the recommendation (be more strict or benevolent).
-+ `completeness` (number, optional) - Completness of the result. <0, 1> The lower is the value, the lower accuracy of the result.
-+ `code`: OK (enum, required) - Result code.
-    + `OK`
-    + `UNKNOWN`
-    + `ADDITIONAL_DATA_SECURITY` - The customer will be asked to send additional data for security reasons.
-    + `ADDITIONAL_DATA_LIMIT` - The customer has insufficient limit and will be asked to send additional data to increase limit.
-    + `INSUFFICIENT_LIMIT` - The customer has insufficient limit and there is no way to increase it.
-    + `INSUFFICIENT_LIMIT_OPPORTUNITY` - The customer has insufficient limit and can increase it by paying previous not paid orders.
-    + `DETAILS_NOT_MATCHING` - We know the customer, but his personal details does not match with details in his HCO account. Customer will be asked for correcting not matching details.
-    + `REVOLVING_REQUIRED` - The customer cannot continue without revolving contract. See `revolvingCode` and `revolvingUsability` for additional information.
-    + `NOT_AVAILABLE` - Funding type is not available.
-+ `customerType` (enum, required) - Customer type.
-    + `UNKNOWN` - Customer is uknown for HCO.
-    + `FIRST_ORDER` - HCO knows the customer. Customer has no paid orders.
-    + `FULL` -  HCO knows the customer. Customer has at least one paid order.
-    + `BLOCKED` - HCO knows the customer. Customer is blocked.
-+ `customerDueDateCategory` (enum, required)
-    + `CATEGORY_CLASSIC` - customer with classic due date (14 days, with the exception of events (Christmas, etc.))
-    + `CATEGORY_EXTENDED` - customer with extended due date (20th day of next month, with the exception of events (Christmas, etc.))
-+ `customerOrdersCountLimit`: 4 (number, optional) - The maximum orders count that the customer can make. Not set if there is no limit.
-+ `customerOrdersCountRemaining`: 2 (number, optional) - The remaining orders count that the customer can make. Not set if there is no limit.
-+ `revolvingUsability`: true (boolean, optional) - Existing revolving account is usable for financing. For more detailed information see `revolvingCode`.
-+ `revolvingCode`: OK (enum, optional)
-    + `OK`
-    + `ADDITIONAL_DATA_SECURITY` - The customer will be asked to send additional data for security reasons (see additionalData).
-    + `ADDITIONAL_ACTION` - The customer will be asked for further actions (increase of the global limit, to sign credit terms... )
-    + `NEW_REVOLVING` - New revolving loan is available for customer.
-    + `NOT_AVAILABLE` - Revolving loan is not available for customer.
-+ `message` (string, optional) - Custom message for customer.
-    Examples:
-    “V HCO peněžence nemáte dostatečný limit.”
-    “Uveďte do objednávky jméno a příjmení, které používáte ve službě HCO.”
-    etc.
-+ `additionalData` (array[string], optional) - List of additional data that customer has to send.
-    Possible values in array: `PERSONAL_ID`, `ID_CARD_NO`, `ID_CARD_EXPIRY_DATE`, `ID_CARD_SCAN`.
-+ `additionalActions` (array[string], optional) - List of additional actions which will be required to finish application.
-    Possible values in array: `MOBILE_VERIFICATION`, `ACCOUNT_REGISTRATION`, `LIMIT_INCREASE`, `CREDIT_TERM_SUPPLEMENT`, `PAPERFORM_SUPPLEMENT`.
-
-## PrecheckResults (object)
-Precheck results.
-
-### Properties
-+ `id` (string, required) - Unique identificator of precheck. Send this identificator in ApplicationRequest for better approval rate.
-+ `results` (array[PrecheckResult], required) - Precheck results for each type of product.
-+ `limits` (Limits, optional)
-    Customer limits.
-    Estimated in case we don!t know the customer.
-    Current customer's limits in case we know him and customer give us an approval for their usage [TODO legal].
-
-## OrderChangeNotification (object)
-Order change request data (HC asks partner to correct order data).
-
-### Properties
-+ `applicationId`: `02-11200a0ee1` (string, required) - Application identifier.
-+ `type` (enum, required) - Change type.
-    + PERSONAL_INFO - HC is trying correct customer's personal info (typos in name, surname... etc.).
-    + ORDER_ITEMS - HC received order items change proposal from customer.
-    + DELIVER_ADDRESS - HC received delivery address change proposal from customer.
-+ `order` (OrderExtended, required) - Corrected order data.
 
 ## Error (object)
 + code: `ERR_1000_SOME_ERROR_CODE` (string, required) - Unique internal error code
