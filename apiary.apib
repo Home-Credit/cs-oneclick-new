@@ -238,6 +238,8 @@ There are 3 levels of error severity:
 # Group Testing & Integration
 This section should help new partner's e-shop developers with better understanding of the API and connected processes especially during early stages of the API integration.
 
+> Temporarily described in separate document "Základní informace k platební metodě HC On-line.docx" obtainable through a request at jakub.klos@homecredit.cz .
+
 
 # Group Security
 To access our API, you have to obtain *access token* first; this token is a string of arbitrary length (30+ chars) and it has to be included in HTTP header to every request to API. This section describes way to obtain valid access token and use it to access protected resources.
@@ -337,20 +339,22 @@ Use `/financing/v1/applications` resource with properly filled request that cont
 - Financing type (always `INSTALLMENT`)
 - Details of selected financing type (if required depends on selected financing type)
   - \*Installment settings - preferred installment amount
-  - \*Installment settings - preferred downpayment amount
+  - \*Installment settings - preferred down payment amount
   - \*Installment settings - installment program product code
 - Personal data processing agreement (* will not be required when GDPR comes into force)
 - Additional information necessary for the continuation and completion of the process
   - Your URL where the customer should be redirected after application approval
   - Your URL where the customer should be redirected after application rejection
   - URL of your notification endpoint you want us to send you notifications about particular application updates
-> \* = Required for financing type `INSTALLMENT` in case customer has already used installment calculator embedded on your website and selected preffered installment program. See the [Offers operations section](#reference/offers-operations) for more details about possibility to embed installment calculator on your website.
+> \* = Required in case customer has already used installment calculator embedded on your website and selected preffered installment program. See the [Offers operations section](#reference/offers-operations) for more details about possibility to embed installment calculator on your website.
 
 If the request was successfully processed, you receive HTTP status code 201 and *application* object with at least following information in the response:
 - Application unique ID
 - Application state
 - Application substate
 - Gateway redirect URL where you should redirect a customer after processing of the response
+
+> You may also receive information about initially requested **down payment** - this can be later changed by customer during the process of finalization of financing application. In such cases we recommend you to check the final **down payment** of approved loan (after the *application* is approved) via `/financing/v1/applications/{applicationId}`.
 
 If the request was recognized as duplication, you receive HTTP status code 200 and the *application* object created during the first related successful request.
 
@@ -396,6 +400,8 @@ If the request was successfully processed, you receive HTTP status code 200 and 
 - Application state
 - Application substate
 - Gateway redirect URL
+
+> You may also receive information about current **down payment** which is useful when you need to find out whether customer's loan was approved with different down payment than had been initially set in your embedded installment calculator.
 
 In other cases, you receive one of the following errors:
 | Status code | Code                  | Message                                                                          |
@@ -1037,7 +1043,7 @@ Financing application
 + `settingsInstallment` (object, required) - Settings for INSTALLMENT Application type.
     + `preferredMonths`: 10 (number, optional) - Preferred number of installments (in months)
     + `preferredInstallment` (Amount, optional) - Preferred repayment amount
-    + `preferredDownPayment` (Amount, optional) - Preferred downpayment amount (amount should be rounded to hundreds)
+    + `preferredDownPayment` (Amount, optional) - Preferred down payment amount (amount should be rounded to hundreds)
     + `productCode`: `a122ax` (string, optional) - Product code, this indicates previous calculation result
     + `productSetCode`: `bc11523` (string, optional) - Product set code, this will limit further calculations
 + `agreementPersonalDataProcessing`: `true` (boolean, optional) - Flag indicating already approved personal data processing
@@ -1340,7 +1346,7 @@ Financing application request
 + `settingsInstallment` (object, required) - Settings for INSTALLMENT Application type.
     + `preferredMonths`: 10 (number, optional) - Preferred number of installments (in months)
     + `preferredInstallment` (Amount, optional) - Preferred repayment amount
-    + `preferredDownPayment` (Amount, optional) - Preferred downpayment amount (amount should be rounded to hundreds)
+    + `preferredDownPayment` (Amount, optional) - Preferred down payment amount (amount should be rounded to hundreds)
     + `productCode`: `a122ax` (string, optional) - Product code, this indicates previous calculation result
     + `productSetCode`: `bc11523` (string, optional) - Product set code, this will limit further calculations
 + `agreementPersonalDataProcessing`: `true` (boolean, optional) - Personal data processing agreement
