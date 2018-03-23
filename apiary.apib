@@ -1,23 +1,23 @@
 FORMAT: 1A
 HOST: https://api.homecredit.cz
 
-# CS - OneClick API without deferral
+# CS - OneClick API - Installments
 API documentation for Home Credit One-Click API.
 
 In case of any question, please contact Tomáš Bárta (Tomas.Barta@homecredit.cz).
 
 ## Getting started
-This online document describes Home Credit One-Click API - the means for partner e-shops through which they can offer their customers the benefits of one of Home Credit's payment method.
+This online document describes Home Credit (HC) One-Click API - the means for partner e-shops through which they can offer their customers the benefits of one of Home Credit's payment methods.
 
 The aim of here described services is to allow customers the smooth running through the process of an online purchase. The services that allow achieving this goal are divided into the following groups:
 
-| Group of services | Purpose |
-| ---      | ---     |
+| Group of services       | Purpose |
+| ---                     | ---     |
 | Security                | Security rules and principles |
 | Application operations  | Services that allows processing of *application* and *order* during their whole lifecycle |
-| Offers operations       | Services that allow partner e-shops to implement an installment calculator on their websites |
-| Precheck operations     | Services that allow partner e-shops find out a probability of *application's* approval and limits of particular *customer*, if known to HC |
-| Merchantsite operations | Services that should be developed and exposed by partner e-shops to allow HC asynchronously inform these partner e-shops about important changes regarding particular *applications* and *orders* |
+| Offers operations       | Services that allow partner's e-shops to implement an installment calculator on their websites |
+| Precheck operations     | Services that allow partner's e-shops find out a probability of *application's* approval and limits of particular *customer*, if known to HC |
+| Merchantsite operations | Services that should be developed and exposed by partner's e-shops to allow HC asynchronously inform these partner's e-shops about important changes regarding particular *applications* and *orders* |
 | Health check            | Health check usage description |
 
 ### Basic implementation
@@ -29,36 +29,19 @@ The most basic and minimum way how to implement HCO API is to at least implement
 1. Redirect handlers.
     - Special URLs for customers that shows payment success or rejection.
 1. [Application notification](#reference/merchantsite-operations/application-notification)
-1. [Generate invoice info](#reference/application-operations/invoices/generate-invoice-info)
-    - To put all the necessary information to invoices (correct due date, bank number...). Not needed for `INSTALLMENT` financing type.
-1. [Mark order items as sent](#reference/application-operations/mark-order-items-as-sent) (necessary for financing type `INSTALLMENT`) or [Mark order items as delivered](#reference/application-operations/mark-order-items-as-delivered) (depends when merchant invoices the order)
-    - HCO won't send money if the order (order items) is not marked as `SENT` / `DELIVERED`.
+1. [Mark order items as sent](#reference/application-operations/mark-order-items-as-sent) or [Mark order items as delivered](#reference/application-operations/mark-order-items-as-delivered) (depends when merchant invoices the order)
+    - HC does not start the process of financial compensation unless the order is marked as `SENT` / `DELIVERED`.
 
-[![Sequence diagram of minimum implementation](https://github.com/mdostal-hci/oneclick-images/raw/master/SequenceDiagramMinimum.png)](https://github.com/mdostal-hci/oneclick-images/raw/master/SequenceDiagramMinimum.png)
+[![Sequence diagram of minimum implementation](https://github.com/mdostal-hci/oneclick-images/raw/master/SequenceDiagramInstallmentMinimum.png)](https://github.com/mdostal-hci/oneclick-images/raw/master/SequenceDiagramInstallmentMinimum.png)
 
-It's always needed to send all attributes marked as required, but filling optional parameters will result in better application approval rate. You should always consider to fill the most attributes as possible. Contact the sales support to find out which attributes correlate with approval rate the most.
-
-
-### Advanced implementation
-You can use advanced operations to improve customer experience.
-
-1. [Precheck](#reference/precheck-operations/precheck)
-    - Merchant can prevent customer to be redirected to HCO gateway if the customer is not suitable for HCO by precheck operation.
-1. Operations to integrate HCO better in merchant checkout:
-    - [Request application OTP](#reference/application-operations/request-application-otp)
-    - [Verify application](#reference/application-operations/verify-application)
-    - [Send application additional data](#reference/application-operations/send-application-additional-data)
-
-    > IMPORTANT NOTE: Despite the usage of these operations it's always necessary to check *application* `stateReason`. If `stateReason == PROCESSING_REDIRECT_NEEDED` there is no way how to complete *application* throught API calls and you have to redirect customer to `gatewayRedirectUrl`.
-
-[![Sequence diagram of advanced implementation](https://github.com/mdostal-hci/oneclick-images/raw/master/SequenceDiagramAdvanced.png)](https://github.com/mdostal-hci/oneclick-images/raw/master/SequenceDiagramAdvanced.png)
+It is necessary to fill all attributes marked as required in the request but filling optional parameters will result in better application approval rate. You should always consider to fill the most attributes as possible. Contact the sales support to find out which attributes correlate with approval rate the most.
 
 ## Naming conventions
 - we use camelCase for all object and attribute names
 - we use CAPITAL_UNDERSCORE for enum values
 - we use plural in resource names
 
-## Paging
+## Paging - TODO (reálné příklady)
 - some resources (stated in documentation) that return collection of objects support pagination. We are using technique known as 'cursor-based pagination'.
 - on request:
   - query parameter `limit` specifies maximum number of objects in returned collection
@@ -87,7 +70,7 @@ Example response pagingInfo:
 }
 ```
 
-## Sorting
+## Sorting - TODO (reálné příklady)
 - some resources (stated in documentation) supports result sorting. You can specify sorting attributes and order using `sort` request parameter. For ascending order, specify just attribute name; for descending order, add unary - in front of attribute name. You can specify multiple attributes for sorting, separated by comma.
 - each resource that supports sorting specifies list of attributes that can be used for sorting.
 
@@ -97,7 +80,7 @@ Examples:
 - `/banking/accounts?sort=accountType,-accountCurrency,accountName` - get list of accounts, sorted by type (ascending), then by currency descending and then by account name (ascending)
 
 
-## Filtering
+## Filtering - TODO (reálné příklady)
 Some resources (stated in documentation) supports results filtering. Such resources have list of filters specified together with possible operations and possible values.
 
 You can specify filtering by passing `filter` attribute. General pattern to specify filter is:
@@ -156,7 +139,7 @@ Please, keep in mind following restrictions regarding requests:
 
 
 ## API calls limits
-When you reach API calls limit (you call our API more times than is your quota), you receive HTTP error 429. To inform you about limits we use following response headers:
+When you reach API calls limit (you call the API more times than is your quota), you receive HTTP error 429. To inform you about limits we use following response headers:
 - `X-Rate-Limit-Limit` - The number of allowed requests in the current period
 - `X-Rate-Limit-Remaining` - The number of remaining requests in the current period
 - `X-Rate-Limit-Reset` - The number of seconds left in the current period
@@ -214,12 +197,12 @@ Errors object example:
 
 Error object attributes
 | attribute name | description |
-| --- | --- |
-| code | unique error code |
-| message | human readable error description (non-localized) |
-| severity | error severity ([see below](#error-severity)) |
-| attribute | json path of request attribute that caused the error (optional) |
-| ticketId | internal ticket ID, used for error backtracking |
+| ---            | ---         |
+| code           | unique error code |
+| message        | human readable error description (non-localized) |
+| severity       | error severity ([see below](#error-severity)) |
+| attribute      | json path of request attribute that caused the error (optional) |
+| ticketId       | internal ticket ID, used for error backtracking |
 
 <a name="error-severity"></a>
 There are 3 levels of error severity:
@@ -251,6 +234,12 @@ There are 3 levels of error severity:
 - attributes in request/response object are optional, unless stated otherwise (`required` flag under attribute name)
 - required attribute in optional object means, that if optional object is specified, it must contain required attribute.
 - all values in request/response attributes are just examples, except for enum values - these are the only possible values for given attribute.
+
+
+# Group Testing & Integration
+This section should help new partner's e-shop developers with better understanding of the API and connected processes especially during early stages of the API integration.
+
+
 
 
 # Group Security
