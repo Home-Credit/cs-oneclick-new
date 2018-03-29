@@ -20,20 +20,23 @@ The aim of here described services is to allow customers the smooth running thro
 | Health check            | Health check usage description                                    
 
 ### Basic implementation
-The most basic and minimum way how to implement HCO API is to at least implement:
+Basic and minimum way how to implement HCO API is to at least implement:
 1. [Login](#reference/security/login-partner)
-    - Needed for all operations.
+    - You must be authorized to be able to access to the most resources
 1. [Create application](#reference/application-operations/create-application)
-    - Called with all order and customer data after finishing the order.
+    - When you collect necessary data of a customer and his/her order, call this resource to start the loan approval process by creating an `application`. `Application` itself and its ID are essential for a successful process completion.
 1. Redirect handlers.
     - Special URLs for customers that shows payment success or rejection.
 1. [Application notification](#reference/merchantsite-operations/application-notification)
-1. [Mark order items as sent](#reference/application-operations/mark-order-items-as-sent) or [Mark order items as delivered](#reference/application-operations/mark-order-items-as-delivered) (depends when merchant invoices the order)
+    - This endpoint has to be exposed on your side to allow HC back-end to asynchronously notify you about the important changes regarding particular applications and orders.
+1. [Mark order items as sent](#reference/application-operations/mark-order-items-as-sent) or [Mark order items as delivered](#reference/application-operations/mark-order-items-as-delivered) (use the one that suits your expedition and invoicing process, `Mark order items as delivered` is preferred)
     - HC does not start the process of financial compensation unless the order is marked as `SENT` / `DELIVERED`.
 
 [![Sequence diagram of minimum implementation](https://github.com/mdostal-hci/oneclick-images/raw/master/SequenceDiagramInstallmentMinimum.png)](https://github.com/mdostal-hci/oneclick-images/raw/master/SequenceDiagramInstallmentMinimum.png)
 
-It is necessary to fill all attributes marked as required in the request but filling optional parameters will result in better application approval rate. You should always consider to fill the most attributes as possible. Contact the sales support to find out which attributes correlate with approval rate the most.
+[![State diagram of Application](https://github.com/mdostal-hci/oneclick-images/raw/master/StateDiagramApplication.png)](https://github.com/mdostal-hci/oneclick-images/raw/master/StateDiagramApplication.png)
+
+It is necessary to fill in all attributes marked as required in the request but filling optional parameters will result in better application approval rate. You should always consider to fill as many attributes as possible. Contact the sales support to find out which attributes correlate with approval rate the most.
 
 ## Naming conventions
 - we use camelCase for all object and attribute names
@@ -205,7 +208,7 @@ Error object attributes
 
 <a name="error-severity"></a>
 There are 3 levels of error severity:
-- `ERROR` - critical error, execution cannot continue. This MUST be indicated also by appropriate HTTP status code (`422 Unprocessable Entity`)
+- `ERROR` - critical error, execution cannot continue. This MUST be indicated also by appropriate HTTP status code (e.g. `422 Unprocessable Entity`)
 - `WARN` - non-critical error, execution can continue but further user interaction is advisable (for request to proceed, you MUST specify this error code in `override` request attribute). This MIGHT be indicated also by appropriate HTTP status code.
 - `INFO` - information only, execution can continue without user interaction.
 
@@ -337,16 +340,16 @@ Use `/financing/v1/applications` resource with properly filled request that cont
     - Total price (all pieces, including VAT)
     - Total VAT
 - Financing type (always `INSTALLMENT`)
-- Details of selected financing type (if required depends on selected financing type)
+- Financing type details
   - \*Installment settings - preferred installment amount
   - \*Installment settings - preferred down payment amount
   - \*Installment settings - installment program product code
-- Personal data processing agreement (* will not be required when GDPR comes into force)
+- Personal data processing agreement (NOTE: will not be required when GDPR comes into force)
 - Additional information necessary for the continuation and completion of the process
   - Your URL where the customer should be redirected after application approval
   - Your URL where the customer should be redirected after application rejection
   - URL of your notification endpoint you want us to send you notifications about particular application updates
-> \* = Required in case customer has already used installment calculator embedded on your website and selected preffered installment program. See the [Offers operations section](#reference/offers-operations) for more details about possibility to embed installment calculator on your website.
+> \* = Required in case customer has already used installment calculator embedded on your website and selected preferred installment program. See the [Offers operations section](#reference/offers-operations) for more details about possibility to embed installment calculator on your website. Otherwise optional (except).
 
 If the request was successfully processed, you receive HTTP status code 201 and *application* object with at least following information in the response:
 - Application unique ID
@@ -827,19 +830,20 @@ Services that should be developed and exposed by partner e-shops to allow HC asy
 ## Application notification [/financing/v1/{application.merchantUrls.notificationEndpoint}]
 We use this resource when there is need to let you know about important changes within particular *application*. Namely in following situations:
 
-| Trigger                                                             | Corresponding Application.stateReason | Expected reaction                                                      |
-| ---                                                                 | ---                                   | ---                                                                    |
-| Application was approved (approval process is proceeding correctly) | PROCESSING_APPROVED                   | Do not cancel customer's order prematurely                             |
-| Application was rejected                                            | REJECTED                              | You should probably cancel respective order and release reserved goods |
-| Application was cancelled                                           | CANCELLED_NOT_PAID                    | You should probably cancel respective order and release reserved goods |
-| Order to dispatch (we commit to finance customer's order)           | READY_TO_SHIP                         | Dispatch the order to the customer                                     |
-| Application is going to be paid out                                 | READY_PAID                            | Wait for us processing financial compensation with you                 |
+| Trigger                                                             | Corresponding Application.stateReason | Expected reaction                                                                                       |
+| ---                                                                 | ---                                   | ---                                                                                                     |
+| Application was approved (approval process is proceeding correctly) | PROCESSING_APPROVED                   | Do not cancel customer's order prematurely                                                              |
+| Application was rejected                                            | REJECTED                              | You should probably cancel respective order and release reserved goods                                  |
+| Application was cancelled (before delivery)                         | CANCELLED_NOT_PAID                    | You should probably cancel respective order and release reserved goods                                  |  
+| Order to dispatch (we commit to finance customer's order)           | READY_TO_SHIP                         | Dispatch the order to the customer                                                                      |
+| Application is going to be paid out                                 | READY_PAID                            | Wait for us processing financial compensation with you                                                  |
+<!-- | Application was cancelled (after delivery)                          | CANCELLED_RETURNED                    | You should probably cancel respective order and process returning of the goods (if not already done so) |-->
 
 We fill the request with at least following information:
 - Application unique ID
 - Application state
 - Application substate
-- Timestamp of the notification [TBD - not yet available]
+<!-- - Timestamp of the notification [TBD - not yet available] -->
 
 > USEFUL NOTE: If you think it takes us unusually long time to send you particular notification, do not hesitate to use `/financing/v1/applications/{applicationId}` resource (where `{applicationId}` is the application ID you received in the response of `/financing/v1/applications` after its creation) to directly find out information you seek.
 
@@ -965,7 +969,6 @@ Delivery carrier
         + GLS
         + HDS_COMFORT
         + HDS_STANDARD
-
     + carrierCustom: `my custom carrier` (string, required) - For carriers not found in enumeration of customer ID, specify value as text
 
 
@@ -1129,7 +1132,7 @@ Order information, needed to create an application.
 
 ### Properties
 + `number`: `AA234` (string, required) - Order number (internal for e-shop)
-+ `variableSymbols` (array[string], optional) - Variable symbols (internal for e-shop)
++ `variableSymbols` (array[string], optional) - Variable symbols (internal for e-shop). The first VS in this array is used as the VS of the reconciliation payment.
 + `totalPrice` (Amount, required) - Total order amount, including VAT
 + `totalVat` (array[VatAmount], required) - Total VAT amounts split by their VAT rates
 + `addresses` (array[Address], required) - Addresses. Only `BILLING` and `DELIVERY` types are allowed.
@@ -1139,14 +1142,7 @@ Order information, needed to create an application.
     + `PERSONAL_PARTNER` - Personal collection at partner network
     + `ONLINE` - Online delivery (e.g. for intangible assets)
 + `deliveryCarrier` (DeliveryCarrier, optional) - Delivery carrier, when applicable.
-+ `reservationDate`: `2017-07-15T00:00:00+02:00` (string, optional)
-
-   Date and time until order is reserved.
-
-   Until 'reservationDate' HCO will try to notify partner with Application notification about approval or rejection.
-
-   After this date and time, e-shop does not guarantee items availability (if application processing is longer, it may endanger order fullfillment).
-
++ `reservationDate`: `2017-07-15T00:00:00+02:00` (string, optional) - Date and time until order is reserved. After this date and time, e-shop does not guarantee items availability (e.g. if application processing is longer, it may endanger order fullfillment).
 + `items` (array[ApplicationRequestOrderItem], required) - Order items
 + `documents` (array[Document], optional) - Attached documents (invoices etc.)
 
