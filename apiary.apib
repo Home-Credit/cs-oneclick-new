@@ -11,25 +11,25 @@ This online document describes Home Credit (HC) One-Click API - the means for pa
 
 The aim of here described services is to allow customers the smooth running through the process of an online purchase. The services that allow achieving this goal are divided into the following groups:
 
-| Group of services       | Purpose                                                                                                                                                                                           |
-| ---                     | ---                                                                                                                                                                                               |
-| Security                | Security rules and principles                                                                                                                                                                     |
-| Application operations  | Services that allows processing of *application* and *order* during their whole lifecycle                                                                                                         |
-| Offers operations       | Services that allow partner e-shops to implement an installment calculator on their websites                                                                                                      |
-| Merchantsite operations | Services that should be developed and exposed by partner e-shops to allow HC asynchronously inform these partner e-shops about important changes regarding particular *applications* and *orders* |
-| Health check            | Health check usage description                                    
+| Group of services                  | Purpose                                                                                                                                                                                           |
+| ---                                | ---                                                                                                                                                                                               |
+| Security                           | Security rules and principles                                                                                                                                                                     |
+| Application resources              | Services that allows processing of *application* and *order* during their whole lifecycle                                                                                                         |
+| Installments calculator resources  | Services that allow partner e-shops to implement an installment calculator on their websites                                                                                                      |
+| Merchantsite resources             | Services that should be developed and exposed by partner e-shops to allow HC asynchronously inform these partner e-shops about important changes regarding particular *applications* and *orders* |
+| Health check                       | Health check usage description                                                                                                                                                                    |                                   
 
 ### Basic implementation
 Basic and minimum way how to implement HCO API is to at least implement:
 1. [Login](#reference/security/login-partner)
     - You must be authorized to be able to access to the most resources
-1. [Create application](#reference/application-operations/create-application)
+1. [Create application](#reference/application-resources/create-application)
     - When you collect necessary data of a customer and his/her order, call this resource to start the loan approval process by creating an `application`. `Application` itself and its ID are essential for a successful process completion.
 1. Redirect handlers.
     - Special URLs for customers that shows payment success or rejection.
-1. [Application notification](#reference/merchantsite-operations/application-notification)
+1. [Application notification](#reference/merchantsite-resources/application-notification)
     - This endpoint has to be exposed on your side to allow HC back-end to asynchronously notify you about the important changes regarding particular applications and orders.
-1. [Mark order items as sent](#reference/application-operations/mark-order-items-as-sent) or [Mark order items as delivered](#reference/application-operations/mark-order-items-as-delivered) (use the one that suits your expedition and invoicing process, `Mark order items as delivered` is preferred)
+1. [Mark order items as sent](#reference/application-resources/mark-order-items-as-sent) or [Mark order items as delivered](#reference/application-resources/mark-order-items-as-delivered) (use the one that suits your expedition and invoicing process, `Mark order items as delivered` is preferred)
     - HC does not start the process of financial compensation unless the order is marked as `SENT` / `DELIVERED`.
 
 [![Sequence diagram of minimum implementation](https://github.com/mdostal-hci/oneclick-images/raw/master/SequenceDiagramInstallmentMinimum.png)](https://github.com/mdostal-hci/oneclick-images/raw/master/SequenceDiagramInstallmentMinimum.png)
@@ -83,7 +83,7 @@ Examples:
 
 
 ## Filtering
-Some resources (stated in documentation) supports results filtering. Such resources have list of filters specified together with possible operations and possible values.
+Some resources (stated in documentation) supports results filtering. Such resources have list of filters specified together with possible resources and possible values.
 
 You can specify filtering by passing `filter` attribute. General pattern to specify filter is:
 
@@ -307,7 +307,7 @@ Partner authenticate himself and obtain acces token
     + Attributes (Errors)
 
 
-# Group Application operations
+# Group Application resources
 Services that allows processing of *application* and *order* during their whole lifecycle.
 
 ## Create application [/financing/v1/applications]
@@ -349,7 +349,7 @@ Use `/financing/v1/applications` resource with properly filled request that cont
   - Your URL where the customer should be redirected after application approval
   - Your URL where the customer should be redirected after application rejection
   - URL of your notification endpoint you want us to send you notifications about particular application updates
-> \* = Required in case customer has already used installment calculator embedded on your website and selected preferred installment program. See the [Offers operations section](#reference/offers-operations) for more details about possibility to embed installment calculator on your website. Otherwise optional (except).
+> \* = Required in case customer has already used installment calculator embedded on your website and selected preferred installment program. See the [Installments calculator resources section](#reference/installments-calculator-resources) for more details about possibility to embed installment calculator on your website. Otherwise optional (except).
 
 If the request was successfully processed, you receive HTTP status code 201 and *application* object with at least following information in the response:
 - Application unique ID
@@ -686,17 +686,26 @@ Search for *order* using specified parameters.
     + Attributes (Errors)
 
 
-# Group Offers operations
-When a customer wants to pay for a purchase by a loan and you want to provide him an option to choose from available offers while still being on your website, you should achieve this by implementing your installment calculator that uses following resources:
+# Group Installments calculator resources
+When you want to provide your customer (that wants to pay for a purchase by a loan) an option to choose from available installment programs while he is still on your website, it is necessary to implement "installments calculator".
 
+Choose one of the following approaches to integrate installments calculator into your website:  
+
+- A) Implementing your own installment calculator, with your FE in your design that uses designated API resources ([described below](#reference/installments-calculator-resources/implementing-own-installments-calculator)).
+- B) Integrating Home Credit's javascript widget (described in [special chapter](#reference/javascript-widget-integration)) that:
+  - provides GUI and front-end functionalities
+  - prepares requests for e-shop's back-end (that forwards/collect calculation data to/from designated API resources)
+  - provides necessary data to e-shop's back-end in order to easily use them within [*application* creation request](#reference/application-resources/create-application)
+
+> NOTE: Implementation of installment calculator is optional. Customers can always use the installment calculator embedded in Home Credit's front-end.
+
+## Implementing own installments calculator
+In order to implement your own installment calculator (with your GUI design) you will need following resources:
 - `/financing/v1/installmentProgramsOffers` - to find out available installment programs offers and their details
 - `/financing/v1/installmentPrograms` - to find out details of a chosen installment program
 - `/financing/v1/installmentProgramsDownPayments` - to find out down payment options within available installment programs offers
 
-> NOTE: Implementation of installment calculator is optional, customers can always use the installment calculator embedded in Home Credit's front-end
-
-
-## Installment programs offers [/financing/v1/installmentProgramsOffers]
+### Installment programs offers [/financing/v1/installmentProgramsOffers]
 When a customer wants to pay for a purchase by a loan and you want to show him an offer of available installment programs, use `/financing/v1/installmentProgramsOffers` resource with properly filled request that contains at least following data:
 - Product set code (you should know the proper product set code from Home Credit's sales representative or other similar source; if you don't provide product set code, your default product set will be used)
 - Price of customer's purchase
@@ -716,7 +725,7 @@ In other cases, you receive one of the following errors:
 | 500         | INTERNAL_SERVER_ERROR | Unexpected condition was encountered and no more specific message is suitable    |
 
 
-### Calculate installment programs offer  [POST]
+#### Calculate installment programs offer  [POST]
 Calculate installment programs offer according to specified input
 
 feature | supported by resource
@@ -741,7 +750,7 @@ feature | supported by resource
     + Attributes (Errors)
 
 
-## Installment programs [/financing/v1/installmentPrograms]
+### Installment programs [/financing/v1/installmentPrograms]
 When a customer wants to know details of one of previously offered installment programs use `/financing/v1/installmentPrograms` resource with properly filled request that contains at least following data:
 - Product code of given installment program
 - Price of customer's purchase
@@ -760,7 +769,7 @@ In other cases, you receive one of the following errors:
 | 500         | INTERNAL_SERVER_ERROR | Unexpected condition was encountered and no more specific message is suitable    |
 
 
-### Calculate installment program detail [POST]
+#### Calculate installment program detail [POST]
 Calculate installment program detailed information.
 
 It returns the installment program that most closely matches specified input.
@@ -768,23 +777,17 @@ It returns the installment program that most closely matches specified input.
 + Request (application/json; charset=utf-8)
     + Attributes (InstallmentProgramsRequest)
 
-
 + Response 200(application/json; charset=utf-8)
-
-        Detailed information about installment program
-
+Detailed information about installment program
     + Attributes (InstallmentProgram)
 
-
 + Response 422(application/json; charset=utf-8)
-
-        No installment program was found
-
+No installment program was found
     + Attributes (Errors)
 
 
-## Installment programs down payments [/financing/v1/installmentProgramsDownPayments]
-When a customer wants to pay for a purchase by a loan and also wants to choose own down payments settings within offered installment calendars, use `/financing/v1/installmentProgramsDownPayments` resource with properly filled request that contains at least following data:
+### Installment programs down payments [/financing/v1/installmentProgramsDownPayments]
+When a customer wants to pay for a purchase by a loan and also wants to choose own down payments settings within offered installment programs, use `/financing/v1/installmentProgramsDownPayments` resource with properly filled request that contains at least following data:
 - Product set code (you should know the proper product set code from Home Credit's sales representative or other similar source)
 - Price of customer's purchase
 
@@ -801,68 +804,66 @@ In other cases, you receive one of the following errors:
 | 500         | INTERNAL_SERVER_ERROR | Unexpected condition was encountered and no more specific message is suitable    |
 
 
-### Calculate installment programs down payments [POST]
+#### Calculate installment programs down payments [POST]
 Calculate installment programs down payments according to specified input
 
 + Request (application/json; charset=utf-8)
     + Attributes (InstallmentProgramsDownPaymentsRequest)
 
-
 + Response 200(application/json; charset=utf-8)
-
-        Down payments information - minimal, maximal and available step
-
+Down payments information - minimal, maximal and available step
     + Attributes (InstallmentProgramsDownPayments)
 
-
 + Response 400(application/json; charset=utf-8)
-        Error in processing request
-
+Error in processing request
     + Attributes (Errors)
 
 
-# Group Merchantsite operations
-Services that should be developed and exposed by partner e-shops to allow HC asynchronously inform these partner e-shops about important changes regarding particular *applications* and *orders*
+## Group JavaScript widget integration
+In order to use Home Credit's javascript widget as an installment calculator, your e-shop back-end has to provide following resources consequently called by the widget:
+- `https://youreshop.com/api/calculate`
+- `https://youreshop.com/api/calculateDetail`
+- `https://youreshop.com/api/downPaymentRange`
 
-> **ATTENTION:** This set of APIs is NOT exposed from HC. Instead, it should be developed by partner and accept calls specified below.
+The widget calls these resources during calculation, e-shop's back-end has to forward these requests (extended with proper header) to [Home Credit's API Calculation designated resources](#reference/installments-calculator-resources/implementing-own-installments-calculator) and then forward these responses back to the widget. These resources have the same request and response objects as Home Credit's API calculation resources to make their implementation easier.
 
+### Calculate [/calculate]
 
-## Application notification [/financing/v1/{application.merchantUrls.notificationEndpoint}]
-We use this resource when there is need to let you know about important changes within particular *application*. Namely in following situations:
-
-| Trigger                                                             | Corresponding Application.stateReason | Expected reaction                                                                                       |
-| ---                                                                 | ---                                   | ---                                                                                                     |
-| Application was approved (approval process is proceeding correctly) | PROCESSING_APPROVED                   | Do not cancel customer's order prematurely                                                              |
-| Application was rejected                                            | REJECTED                              | You should probably cancel respective order and release reserved goods                                  |
-| Application was cancelled (before delivery)                         | CANCELLED_NOT_PAID                    | You should probably cancel respective order and release reserved goods                                  |  
-| Order to dispatch (we commit to finance customer's order)           | READY_TO_SHIP                         | Dispatch the order to the customer                                                                      |
-| Application is going to be paid out                                 | READY_PAID                            | Wait for us processing financial compensation with you                                                  |
-<!-- | Application was cancelled (after delivery)                          | CANCELLED_RETURNED                    | You should probably cancel respective order and process returning of the goods (if not already done so) |-->
-
-We fill the request with at least following information:
-- Application unique ID
-- Application state
-- Application substate
-<!-- - Timestamp of the notification [TBD - not yet available] -->
-
-> USEFUL NOTE: If you think it takes us unusually long time to send you particular notification, do not hesitate to use `/financing/v1/applications/{applicationId}` resource (where `{applicationId}` is the application ID you received in the response of `/financing/v1/applications` after its creation) to directly find out information you seek.
-
-### Application notification [POST]
-Notify partner about changes in application.
+#### Calculate [POST]
+Get offer of suitable installment programs as an input for the widget.
 
 + Request (application/json; charset=utf-8)
-    + Attributes (ApplicationBase)
+    + Attributes (InstallmentProgramsOffersRequest)
+
++ Response 200(application/json; charset=utf-8)
+Installment programs collection
+    + Attributes (InstallmentPrograms, required)
 
 
-+ Response 200 (application/json; charset=utf-8)
+### Calculate installment program detail [/calculateDetail]
 
-         {
-            "status": "OK"
-         }
+#### Calculate installment program detail [POST]
+Get requested installment program detailed information as an input for the widget.
 
-+ Response 400 (application/json; charset=utf-8)
++ Request (application/json; charset=utf-8)
+    + Attributes (InstallmentProgramsRequest)
 
-        Can not process changes
++ Response 200(application/json; charset=utf-8)
+Detailed information about installment program
+    + Attributes (InstallmentProgram)
+
+
+### Installment programs down payments [/downPaymentRange]
+
+#### Calculate installment programs down payments [POST]
+Get available installment programs down payments range as an input for the widget.
+
++ Request (application/json; charset=utf-8)
+    + Attributes (InstallmentProgramsDownPaymentsRequest)
+
++ Response 200(application/json; charset=utf-8)
+Down payments information - minimal, maximal and available step
+    + Attributes (InstallmentProgramsDownPayments)
 
 
 # Group Health check
@@ -919,6 +920,51 @@ Get current state of the API
         Error in processing request
 
     + Attributes (Errors)
+
+
+# Group Merchantsite resources
+Services that should be developed and exposed by partner e-shops to allow HC asynchronously inform these partner e-shops about important changes regarding particular *applications* and *orders*
+
+> **ATTENTION:** This set of APIs is NOT exposed from HC. Instead, it should be developed by partner and accept calls specified below.
+
+
+## Application notification [/financing/v1/{application.merchantUrls.notificationEndpoint}]
+We use this resource when there is need to let you know about important changes within particular *application*. Namely in following situations:
+
+| Trigger                                                             | Corresponding Application.stateReason | Expected reaction                                                                                       |
+| ---                                                                 | ---                                   | ---                                                                                                     |
+| Application was approved (approval process is proceeding correctly) | PROCESSING_APPROVED                   | Do not cancel customer's order prematurely                                                              |
+| Application was rejected                                            | REJECTED                              | You should probably cancel respective order and release reserved goods                                  |
+| Application was cancelled (before delivery)                         | CANCELLED_NOT_PAID                    | You should probably cancel respective order and release reserved goods                                  |  
+| Order to dispatch (we commit to finance customer's order)           | READY_TO_SHIP                         | Dispatch the order to the customer                                                                      |
+| Application is going to be paid out                                 | READY_PAID                            | Wait for us processing financial compensation with you                                                  |
+<!-- | Application was cancelled (after delivery)                          | CANCELLED_RETURNED                    | You should probably cancel respective order and process returning of the goods (if not already done so) |-->
+
+We fill the request with at least following information:
+- Application unique ID
+- Application state
+- Application substate
+<!-- - Timestamp of the notification [TBD - not yet available] -->
+
+> USEFUL NOTE: If you think it takes us unusually long time to send you particular notification, do not hesitate to use `/financing/v1/applications/{applicationId}` resource (where `{applicationId}` is the application ID you received in the response of `/financing/v1/applications` after its creation) to directly find out information you seek.
+
+### Application notification [POST]
+Notify partner about changes in application.
+
++ Request (application/json; charset=utf-8)
+    + Attributes (ApplicationBase)
+
+
++ Response 200 (application/json; charset=utf-8)
+
+         {
+            "status": "OK"
+         }
+
++ Response 400 (application/json; charset=utf-8)
+
+        Can not process changes
+
 
 
 # Data Structures
@@ -1351,33 +1397,25 @@ Financing application request
 
 
 ## InstallmentProgramsRequest (object)
-
-### Properties
 + `productCode`: `a122ax` (string, required) - Product code, this indicates previous calculation result
 + `price` (Amount, required) - Goods price
 + `downPayment` (Amount, optional) - Down payment amount (default is 0, amount should be rounded to hundreds)
 
 
 ## InstallmentProgramsOffersRequest (object)
-
-### Properties
-+ `productSetCode`: `bc11523` (string, optional) - Product set code, this will limit further calculations. If not provided, default productSet will be used.
++ `productSetCode`: `COCHCONL` (string, optional) - Product set code, this will limit further calculations. If not provided, default productSet will be used.
 + `price` (Amount, required) - Order price
 + `downPayment` (Amount, optional) - Down payment amount (default is 0, amount should be rounded to hundreds)
 
 
 ## InstallmentProgramsDownPaymentsRequest (object)
-
-### Properties
-+ `productSetCode`: `bc11523` (string, required) - Product set code, this will limit further calculations
++ `productSetCode`: `COCHCONL` (string, required) - Product set code, this will limit further calculations
 + `price` (Amount, required) - Goods price
 
 
 ## KeyValue (object)
-
-### Properties
 + `key`: `property` (string, required) - Key
-+ `value`: `value` (object, required) - Value
++ `value` (object, required) - Value
 
 
 ## Error (object)
