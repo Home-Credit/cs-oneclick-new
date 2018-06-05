@@ -241,7 +241,7 @@ There are 3 levels of error severity:
 # Group Testing & Integration
 This section should help new partner's e-shop developers with better understanding of the API and connected processes especially during early stages of the API integration.
 
-> Temporarily described in separate document "Základní informace k platební metodě HC On-line.docx" obtainable through a request at jakub.klos@homecredit.cz .
+> Temporarily described in separate document (currently written in Czech) "Základní informace k platební metodě HC On-line.docx" obtainable through a request at tomas.barta@homecredit.cz.
 
 
 # Group Security
@@ -283,7 +283,7 @@ curl -H "Authorization: Bearer secret_token" https://api.homecredit.cz/financing
 
 > NEVER transfer access token nor login credentials over plain HTTP. Such requests will be refused.
 
-
+[insert ABC]
 ## Login partner [/authentication/v1/partner]
 
 ### Login partner [POST]
@@ -694,7 +694,7 @@ Choose one of the following approaches to integrate installments calculator into
 - A) Implementing your own installment calculator, with your FE in your design that uses designated API resources ([described below](#reference/installments-calculator-resources/implementing-own-installments-calculator)).
 - B) Integrating Home Credit's javascript widget (described in [special chapter](#reference/javascript-widget-integration)) that:
   - provides GUI and front-end functionalities
-  - prepares requests for e-shop's back-end (that forwards/collect calculation data to/from designated API resources)
+  - process all needed calculations
   - provides necessary data to e-shop's back-end in order to easily use them within [*application* creation request](#reference/application-resources/create-application)
 
 > NOTE: Implementation of installment calculator is optional. Customers can always use the installment calculator embedded in Home Credit's front-end.
@@ -820,50 +820,7 @@ Error in processing request
 
 
 ## Group JavaScript widget integration
-In order to use Home Credit's javascript widget as an installment calculator, your e-shop back-end has to provide following resources consequently called by the widget:
-- `https://youreshop.com/api/calculate`
-- `https://youreshop.com/api/calculateDetail`
-- `https://youreshop.com/api/downPaymentRange`
-
-The widget calls these resources during calculation, e-shop's back-end has to forward these requests (extended with proper header) to [Home Credit's API Calculation designated resources](#reference/installments-calculator-resources/implementing-own-installments-calculator) and then forward these responses back to the widget. These resources have the same request and response objects as Home Credit's API calculation resources to make their implementation easier.
-
-### Calculate [/calculate]
-
-#### Calculate [POST]
-Get offer of suitable installment programs as an input for the widget.
-
-+ Request (application/json; charset=utf-8)
-    + Attributes (InstallmentProgramsOffersRequest)
-
-+ Response 200(application/json; charset=utf-8)
-Installment programs collection
-    + Attributes (InstallmentPrograms, required)
-
-
-### Calculate installment program detail [/calculateDetail]
-
-#### Calculate installment program detail [POST]
-Get requested installment program detailed information as an input for the widget.
-
-+ Request (application/json; charset=utf-8)
-    + Attributes (InstallmentProgramsRequest)
-
-+ Response 200(application/json; charset=utf-8)
-Detailed information about installment program
-    + Attributes (InstallmentProgram)
-
-
-### Installment programs down payments [/downPaymentRange]
-
-#### Calculate installment programs down payments [POST]
-Get available installment programs down payments range as an input for the widget.
-
-+ Request (application/json; charset=utf-8)
-    + Attributes (InstallmentProgramsDownPaymentsRequest)
-
-+ Response 200(application/json; charset=utf-8)
-Down payments information - minimal, maximal and available step
-    + Attributes (InstallmentProgramsDownPayments)
+In order to use Home Credit's javascript widget as an installment calculator, your e-shop back-end has to be configured properly. How to do it is currently described in separate document (currently written in Czech) "Základní informace k platební metodě HC On-line.docx" obtainable through a request at tomas.barta@homecredit.cz.  
 
 
 # Group Health check
