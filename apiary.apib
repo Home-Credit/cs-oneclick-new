@@ -26,7 +26,7 @@ Basic and minimum way how to implement HCO API is to at least implement:
 1. [Create application](#reference/application-resources/create-application)
     - When you collect necessary data of a customer and his/her order, call this resource to start the loan approval process by creating an `application`. `Application` itself and its ID are essential for a successful process completion.
 1. Redirect handlers.
-    - Special URLs for customers that shows payment success or rejection (more info [here](#parameters-added-to-your-return-urls)).
+    - Special URLs for customers that shows payment success or rejection (more info [here](#introduction/getting-started/parameters-added-to-your-return-urls)).
 1. [Application notification](#reference/merchantsite-resources/application-notification)
     - This endpoint has to be exposed on your side to allow HC back-end to asynchronously notify you about the important changes regarding particular applications and orders.
 1. [Mark order items as sent](#reference/application-resources/mark-order-items-as-sent) or [Mark order items as delivered](#reference/application-resources/mark-order-items-as-delivered) (use the one that suits your expedition and invoicing process, `Mark order items as delivered` is preferred)
