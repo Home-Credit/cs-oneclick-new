@@ -9,12 +9,12 @@ In case of any question, please contact Tomáš Bárta (Tomas.Barta@homecredit.c
 ## Getting started
 This online document describes Home Credit (HC) One-Click API - the means for partner e-shops through which they can offer their customers the benefits of one of Home Credit's payment methods.
 
-The aim of here described services is to allow customers the smooth running through the process of an online purchase. The services that allow achieving this goal are divided into the following groups:
+The aim of here described services is to allow customers the smooth running through the process of an on-line purchase. The services that allow achieving this goal are divided into the following groups:
 
 | Group of services                  | Purpose                                                                                                                                                                                           |
 | ---                                | ---                                                                                                                                                                                               |
 | Security                           | Security rules and principles                                                                                                                                                                     |
-| Application resources              | Services that allows processing of *application* and *order* during their whole lifecycle                                                                                                         |
+| Application resources              | Services that allows processing of *application* and *order* during their whole life cycle                                                                                                         |
 | Installments calculator resources  | Services that allow partner e-shops to implement an installment calculator on their websites                                                                                                      |
 | Merchantsite resources             | Services that should be developed and exposed by partner e-shops to allow HC asynchronously inform these partner e-shops about important changes regarding particular *applications* and *orders* |
 | Health check                       | Health check usage description                                                                                                                                                                    |                                   
@@ -76,7 +76,7 @@ It is necessary to fill in all attributes marked as required in the request but 
   - query parameter `after` specifies last object retrieved in previous request. Its value is usually `id` of last object retrieved in previous call, but this will be stated in documentation. Parameter `after` is used when traversing collection forwards.
   - query parameter `before` specifies first object retrieved in previous request (analogy to `after` parameter), and is used when traversing collection backwards.
   - if `before` and `after` are omitted, beginning of collection is returned, using specified sort order
-  - items in collection are always sorted accoridng to attribute which could be passed in after/before parameters. Even if you specify different sorting order, this attribute will be last sorting criterion; if you do not specify sorting order, result collection will be sorted according to this attribute.
+  - items in collection are always sorted according to attribute which could be passed in after/before parameters. Even if you specify different sorting order, this attribute will be last sorting criterion; if you do not specify sorting order, result collection will be sorted according to this attribute.
 - on response:
   - `pagingInfo` object is returned as part of response body with following attributes:
     - _nextPage_ - request to retrieve next page. Either nextPage or previousPage is returned, depending whether you specify `after` or `before` parameter. If you specify neither `before` nor `after` parameter, these attributes will be omitted from response.
@@ -149,7 +149,7 @@ GET /general/contracts?filter=contractDate|gt|2016-02-10;contractDate|lteq|2016-
 Please, keep in mind following restrictions regarding requests:
 - Maximum request size is **10 MB**.
 - Maximum size of accepted single file is **500 kB**.
-- Here is the list of suppported files:
+- Here is the list of supported files:
 
 | MIME type                                                                 | Example(s)                 |
 | ---                                                                       | ---                        |
@@ -180,7 +180,7 @@ Unless stated otherwise, all responses are sent as `Content-Type: application/js
 ## HTTP status codes
 We use following status codes throughout the API, except for OAuth flow when response codes are prescribed in RFC
 - 200 `OK` - request was successful
-- 201 `Created` - request was successfull and resource was created
+- 201 `Created` - request was successful and resource was created
 - 204 `No Content` - we accepted your request but there is nothing to return (e.g. response is empty)
 - 400 `Bad Request` - syntax error, e.g. request is missing required parameters/attributes or parameter values are of incorrect type
 - 401 `Unauthorized` - your API key is wrong or user not authorized (not logged in)
@@ -334,7 +334,7 @@ Partner authenticate himself and obtain acces token
 
 
 # Group Application resources
-Services that allows processing of *application* and *order* during their whole lifecycle.
+Services that allows processing of *application* and *order* during their whole life cycle.
 
 ## Create application [/financing/v1/applications]
 Elementary flow starts when customer wants to use one of Home Credit's payment method for financing his purchase made in partner e-shop.
@@ -475,7 +475,7 @@ If there is need to completely cancel customer's *order*, it is necessary to can
 | `PROCESSING`      | YES          |
 | `READY`           | YES          |
 
-If the request was successfully processed, you receive HTTP status code 200 and information about cancelled *application* with at least following information in the response:
+If the request was successfully processed, you receive HTTP status code 200 and information about canceled *application* with at least following information in the response:
 - Application unique ID
 - Application type
 - Application state
@@ -854,7 +854,7 @@ To easily find out current API state use the [API state check resource](#referen
 To check the availability of back-end services use the [health check resource](#reference/health-check/health-check).
 
 ## API status check [/info]
-If the API is up and runing, you receive HTTP status code 204 and object of information about it.
+If the API is up and running, you receive HTTP status code 204 and object of information about it.
 
 In other cases, you receive one of the following errors:
 | Status code | Code                  |
@@ -881,7 +881,7 @@ Get current state of the API
 
 
 ## API health check [/financing/v1//health{?timeout}]
-If the API back-end services is up and runing, you receive HTTP status code 204.
+If the API back-end services is up and running, you receive HTTP status code 204.
 
 In other cases, you receive one of the following errors:
 | Status code | Code                  |
