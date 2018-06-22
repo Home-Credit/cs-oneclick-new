@@ -514,6 +514,76 @@ Cancel *application*.
     + Attributes (Errors)
 
 
+## Change application order [/financing/v1/applications/{applicationId}/order]
+When there's some changes within *order* that may have an important impact on the repayment process after its submission, use `/financing/v1/applications/{applicationId}/order` resource in order we can adjust everything properly. `{applicationId}` is the application ID you received in the response of `/financing/v1/applications` after its creation.
+
+| Financing type     | Supported  |
+| ---                | ---        |
+| `INSTALLMENT`      | YES        |
+
+| Application state | Availability                                                          |
+| ---               | ---                                                                   |
+| `REJECTED`        | NO                                                                    |
+| `CANCELLED`       | NO                                                                    |
+| `PROCESSING`      | YES                                                                   |
+| `READY`           | YES* (see the [availability note bellow](#change-order-availability)) |
+
+Use `/financing/v1/applications/{applicationId}/order` resource with properly filled request that contains (only) changed data (resource allows partial put).
+<a name="change-order-availability"></a>
+> **AVAILABILITY NOTE:** Valid request object contains only order number (`order.number`) and/or one item in the array `order.variableSymbols[]`. Supported `stateReason` of `state READY` are `READY_TO_SHIP`, `READY_SHIPPED`, `READY_DELIVERING` (`state PROCESSING` is supported without any limitations).
+
+If the request was successfully processed, you receive HTTP status code 200 and object of information about changed *order* plus basic information about respective *application* (ID, state, substate) with at least following information in the response:
+- Order number
+- Order total price (including VAT)
+- Order total VAT (array of VAT amounts split by VAT rates)
+- Addresses (array)
+  - Country
+  - City
+  - Street
+  - Street number
+  - ZIP
+  - Address type
+- Order items (array)
+  - Order item name
+  - Total price (all pieces, including VAT)
+  - Total VAT
+  - Order item state
+- Order state
+- Application basic information
+  - ID
+  - Application state
+  - Application substate
+
+In other cases, you receive one of the following errors:
+| Status code | Code                  | Explanation                                                                     |
+| ---         | ---                   | ---                                                                             |
+| 400         | INVALID_REQUEST       | Request was not well formatted (malformed request syntax, size too large, etc.) |
+| 404         | OBJECT_NOT_FOUND      | The requested resource could not be found                                       |
+| 422         | NOT_SUPPORTED         | Resource is not supported for given financing type                              |
+| 500         | INTERNAL_SERVER_ERROR | Unexpected condition was encountered and no more specific message is suitable   |
+
+
++ Parameters
+    + applicationId (string, required, `01-11b00a1ef1`)
+
+
+### Change application order [PUT]
+Change *order*. Used to change order number and/or variable symbol.
+
++ Request (application/json; charset=utf-8)
+    + Attributes (OrderChangeRequest)
+
+
++ Response 200(application/json; charset=utf-8)
+        Order was changed
+    + Attributes (OrderExtended)
+
+
++ Response 422(application/json; charset=utf-8)
+    Order can not be changed.
+    + Attributes (Errors)
+
+
 ## Mark order as sent [/financing/v1/applications/{applicationId}/order/send]
 When the whole *order* was shipped to the customer, use `/financing/v1/applications/{applicationId}/order/send` resource where `{applicationId}` is the *application* ID you received in the response of `/financing/v1/applications` after its creation.
 
@@ -1245,6 +1315,15 @@ Order item information.
 + `sentDate`: `2017-01-10` (string, optional) - Date when item was sent. Only when the whole order was NOT sent at once.
 + `deliveryDate`: `2017-01-12` (string, optional) - Date when item was delivered. Only when the whole order was NOT sent at once.
 + `deliveryTrackingNumber`: `EX21121` (string, optional) - Tracking number for the item. Only when the whole order was NOT sent at once.
+
+
+## OrderChangeRequest (object)
++ order (OrderChange, required) - Changed order data.
++ reason (string, optional) - Reason of change.
+
+## OrderChange (object)
++ `number`: `AA234` (string, optional) - Order number (internal for e-shop)
++ `variableSymbols` (array[string], optional) - Variable symbols (internal for e-shop)
 
 
 ## File (object)
