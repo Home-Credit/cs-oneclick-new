@@ -11,13 +11,13 @@ This online document describes Home Credit (HC) One-Click API - the means for pa
 
 The aim of here described services is to allow customers the smooth running through the process of an on-line purchase. The services that allow achieving this goal are divided into the following groups:
 
-| Group of services                  | Purpose                                                                                                                                                                                           |
-| ---                                | ---                                                                                                                                                                                               |
-| Security                           | Security rules and principles                                                                                                                                                                     |
-| Application resources              | Services that allows processing of *application* and *order* during their whole life cycle                                                                                                         |
-| Installments calculator resources  | Services that allow partner e-shops to implement an installment calculator on their websites                                                                                                      |
-| Merchantsite resources             | Services that should be developed and exposed by partner e-shops to allow HC asynchronously inform these partner e-shops about important changes regarding particular *applications* and *orders* |
-| Health check                       | Health check usage description                                                                                                                                                                    |                                   
+| Group of services                  | Purpose                                                                                                                                                                                            |
+| ---                                | ---                                                                                                                                                                                                |
+| Security                           | Security rules and principles                                                                                                                                                                      |
+| Application resources              | Resources that allows processing of *application* and *order* during their whole life cycle                                                                                                        |
+| Installments calculator resources  | Resources that allow partner e-shops to implement an installment calculator on their websites                                                                                                      |
+| Merchantsite resources             | Resources that should be developed and exposed by partner e-shops to allow HC asynchronously inform these partner e-shops about important changes regarding particular *applications* and *orders* |
+| Health check                       | Health check usage description                                                                                                                                                                     |                                                                                                                                                                    |                                 
 
 ### Basic implementation
 Basic and minimum way how to implement HCO API is to at least implement:
@@ -370,7 +370,6 @@ Use `/financing/v1/applications` resource with properly filled request that cont
   - \*Installment settings - preferred installment amount
   - \*Installment settings - preferred down payment amount
   - \*Installment settings - installment program product code
-- Personal data processing agreement (NOTE: will not be required when GDPR comes into force)
 - Additional information necessary for the continuation and completion of the process
   - Your URL where the customer should be redirected after application approval
   - Your URL where the customer should be redirected after application rejection
@@ -402,7 +401,7 @@ Create new *application* of particular financing type
     + Attributes (ApplicationRequest)
 
 
-+ Response 200(application/json; charset=utf-8)
++ Response 201(application/json; charset=utf-8)
 
         Application was created
 
