@@ -3,21 +3,22 @@ HOST: https://api.homecredit.cz
 
 # CS - OneClick API - Installments
 API documentation for Home Credit One-Click API.
+> Version of documentation: `1.07.18.cf27a2822b384b8fe61bd5d3a7988d4db29506c7`
 
-In case of any question, please contact Tomáš Bárta (Tomas.Barta@homecredit.cz).
+In case of any question, please contact our integration department (integrace_eshop@homecredit.cz).
 
 ## Getting started
 This online document describes Home Credit (HC) One-Click API - the means for partner e-shops through which they can offer their customers the benefits of one of Home Credit's payment methods.
 
-The aim of here described services is to allow customers the smooth running through the process of an on-line purchase. The services that allow achieving this goal are divided into the following groups:
+The aim of here described services is to allow customers the smooth running through the process of an online purchase. The services that allow achieving this goal are divided into the following groups:
 
-| Group of services                  | Purpose                                                                                                                                                                                            |
-| ---                                | ---                                                                                                                                                                                                |
-| Security                           | Security rules and principles                                                                                                                                                                      |
-| Application resources              | Resources that allows processing of *application* and *order* during their whole life cycle                                                                                                        |
-| Installments calculator resources  | Resources that allow partner e-shops to implement an installment calculator on their websites                                                                                                      |
-| Merchantsite resources             | Resources that should be developed and exposed by partner e-shops to allow HC asynchronously inform these partner e-shops about important changes regarding particular *applications* and *orders* |
-| Health check                       | Health check usage description                                                                                                                                                                     |                                                                                                                                                                    |                                 
+| Group of services                  | Purpose                                                                                                                                                                                           |
+| ---                                | ---                                                                                                                                                                                               |
+| Security                           | Security rules and principles                                                                                                                                                                     |
+| Application resources              | Services that allows processing of *application* and *order* during their whole life cycle                                                                                                         |
+| Installments calculator resources  | Services that allow partner e-shops to implement an installment calculator on their websites                                                                                                      |
+| Merchantsite resources             | Services that should be developed and exposed by partner e-shops to allow HC asynchronously inform these partner e-shops about important changes regarding particular *applications* and *orders* |
+| Health check                       | Health check usage description                                                                                                                                                                    |
 
 ### Basic implementation
 Basic and minimum way how to implement HCO API is to at least implement:
@@ -41,108 +42,19 @@ It is necessary to fill in all attributes marked as required in the request but 
 ### Parameters added to your return URLs
 - During redirection of the customer from Home Credit's front-end back to e-shop (to one of the provided URLs - `approvedRedirectUrl`, `rejectedRedirectUrl`) there are some potentially useful information about a customer's outcome in Home Credit's front-end added:
   - `orderNumber` (string) - E-shop's internal order number provided within API call of [Create application](#reference/application-resources/create-application)
-  - `contractNumber` (string) – Home Credit's contract number (if applicable, otherwise omitted)
   - `withdrawal` (boolean) – True when the customer's purchase is financed directly from his already existing revolving loan; false when a new contract is being created
-  - `initPay` (number) – Value of initial payment (down payment), usually set to 0
-  - `orderUserStatus` (enum) – Application substate (mapping to `stateReason` is as follows)
-    - `created` - corresponds to `PROCESSING_REDIRECT_NEEDED`
-    - `pre_approved` - corresponds to `PROCESSING_PREAPPROVED`
-    - `rejected` - corresponds to `REJECTED`
-    - `approved` - corresponds to `PROCESSING_APPROVED`
-    - `in_process` - corresponds to `PROCESSING_REVIEW`
-    - `alternative` - corresponds to `PROCESSING_ALT_OFFER`
-    - `confirmed_by_client` - corresponds to `PROCESSING_SIGNED`
-    - `canceled` - corresponds to `CANCELLED_NOT_PAID`
-    - `to_ship` - corresponds to `READY_TO_SHIP`
-    - `shipped` - corresponds to `READY_SHIPPED`
-    - `to_confirm_delivery` - corresponds to `READY_DELIVERING`
-    - `delivered` - corresponds to `READY_DELIVERED`
-    - `paid` - corresponds to `READY_PAID`
-    - `terminated` - corresponds to `CANCELLED_RETURNED`
+- `downPayment` (number) – Value of down payment, usually set to 0
+- `stateReason` (enum) – Application substate
+- `applicationId` (string) - HCO application identifier
   - `checkSum` (string) – hashed message
 
-  - e.g. `http://youreshop.cz?orderNumber=0606104036&orderUserStatus=confirmed_by_client&initPay=1000&checkSum=443E150D3406F6A8DC62C1DB224AFDD84FA9907071BB1AD9B2C7701031793662191501B26AADF3A31361341EA176C80B23D8A9A5E5B5219538289945FE0C20A7&contractNumber=6806000170&withdrawal=false`
+- e.g. `http://youreshop.cz?orderNumber=0606104036&stateReason=PROCESSING_SIGNED&downPayment=100000&checkSum=443E150D3406F6A8DC62C1DB224AFDD84FA9907071BB1AD9B2C7701031793662191501B26AADF3A31361341EA176C80B23D8A9A5E5B5219538289945FE0C20A7&applicationId=01-11b00a1ef1&withdrawal=false`
 
 
 ## Naming conventions
 - we use camelCase for all object and attribute names
 - we use CAPITAL_UNDERSCORE for enum values
 - we use plural in resource names
-
-## Paging
-- some resources (stated in documentation) that return collection of objects support pagination. We are using technique known as 'cursor-based pagination'.
-- on request:
-  - query parameter `limit` specifies maximum number of objects in returned collection
-  - query parameter `after` specifies last object retrieved in previous request. Its value is usually `id` of last object retrieved in previous call, but this will be stated in documentation. Parameter `after` is used when traversing collection forwards.
-  - query parameter `before` specifies first object retrieved in previous request (analogy to `after` parameter), and is used when traversing collection backwards.
-  - if `before` and `after` are omitted, beginning of collection is returned, using specified sort order
-  - items in collection are always sorted according to attribute which could be passed in after/before parameters. Even if you specify different sorting order, this attribute will be last sorting criterion; if you do not specify sorting order, result collection will be sorted according to this attribute.
-- on response:
-  - `pagingInfo` object is returned as part of response body with following attributes:
-    - _nextPage_ - request to retrieve next page. Either nextPage or previousPage is returned, depending whether you specify `after` or `before` parameter. If you specify neither `before` nor `after` parameter, these attributes will be omitted from response.
-    - _prevPage_ - request to retrieve previous page (see `nextPage` attribute description above).
-    - _itemsPerPage_ - number of items per page
-
-
-Example request:
-```
-curl -X GET https://api.homecredit.cz/financing/v1/examples?sort=category&limit=10&after=15
-```
-
-Example response pagingInfo:
-
-```javascript
-"pagingInfo": {
-    "nextPage": "/examples?sort=category&limit=10&after=15"
-    "itemsPerPage": 10,
-}
-```
-
-## Sorting
-- some resources (stated in documentation) supports result sorting. You can specify sorting attributes and order using `sort` request parameter. For ascending order, specify just attribute name; for descending order, add unary - in front of attribute name. You can specify multiple attributes for sorting, separated by comma.
-- each resource that supports sorting specifies list of attributes that can be used for sorting.
-
-Examples:
-- `/public/fxrates?sort=currencyCode` - get list of FX rates sorted by attribute currencyCode
-- `/public/branches?sort=-name` - get list of branches, sorted by attribute name in descending order
-- `/banking/accounts?sort=accountType,-accountCurrency,accountName` - get list of accounts, sorted by type (ascending), then by currency descending and then by account name (ascending)
-
-
-## Filtering
-Some resources (stated in documentation) supports results filtering. Such resources have list of filters specified together with possible resources and possible values.
-
-You can specify filtering by passing `filter` attribute. General pattern to specify filter is:
-
-`<filterName>|<operator>|<values>`
-
-- `filterName` - filter name from documentation
-- `operator` - operator, specified in resource documentation
-- `values` - one or more values for filter. Multiple values are separated by comma
-
-Multiple filters can be specified on each request, separated by semi-colon. They are joined by "AND", so each result item must satisfy all conditions.
-
-
-### Filtering examples
-- get a list of partners with category in (1, 5, 10)
-```
-GET /general/partners?filter=category|in|1,5,10
-```
-
-- get a list of contracts with contractDate in (2016-02-10, 2016-04-28>
-```
-GET /general/contracts?filter=contractDate|gt|2016-02-10;contractDate|lteq|2016-04-28
-```
-
-
-### List of operators
-| Operator | Meaning                |
-| ---      | ---                    |
-| lt       | less than              |
-| lteq     | less than or equals    |
-| eq       | equals                 |
-| gteq     | greater than or equals |
-| gt       | greater than           |
-| in       | value in list          |
 
 
 ## Request restrictions
@@ -267,7 +179,7 @@ There are 3 levels of error severity:
 # Group Testing & Integration
 This section should help new partner's e-shop developers with better understanding of the API and connected processes especially during early stages of the API integration.
 
-> Temporarily described in separate document (currently written in Czech) "Základní informace k platební metodě HC On-line.docx" obtainable through a request at tomas.barta@homecredit.cz.
+> Temporarily described in separate document (currently written in Czech) "Základní informace k platební metodě HC On-line.docx" obtainable through a request at integrace_eshop@homecredit.cz.
 
 
 # Group Security
@@ -309,7 +221,7 @@ curl -H "Authorization: Bearer secret_token" https://api.homecredit.cz/financing
 
 > NEVER transfer access token nor login credentials over plain HTTP. Such requests will be refused.
 
-[insert ABC]
+
 ## Login partner [/authentication/v1/partner]
 
 ### Login partner [POST]
@@ -334,7 +246,7 @@ Partner authenticate himself and obtain acces token
 
 
 # Group Application resources
-Services that allows processing of *application* and *order* during their whole life cycle.
+Services that allows processing of *application* and *order* during their whole lifecycle.
 
 ## Create application [/financing/v1/applications]
 Elementary flow starts when customer wants to use one of Home Credit's payment method for financing his purchase made in partner e-shop.
@@ -397,9 +309,19 @@ In other cases, you receive one of the following errors:
 ### Create application [POST]
 Create new *application* of particular financing type
 
-+ Request (application/json; charset=utf-8)
++ Request Example_VALID_REQUEST (application/json; charset=utf-8)
     + Attributes (ApplicationRequest)
-
+      + `customer` (Customer, required) - Customer information
+          + `addresses` (array[Address], required) - Addresses. Only `BILLING` and `DELIVERY` types are allowed.
+              + Sample
+                  + (object)
+                      + `name`: `John Newborn`
+                      + `country`: `CZ`
+                      + `city`: `Prague`
+                      + `streetAddress`: `Letenská`
+                      + `streetNumber`: `22`
+                      + `zip`: `140 00`
+                      + `addressType`: `CONTACT`
 
 + Response 201(application/json; charset=utf-8)
 
@@ -407,6 +329,34 @@ Create new *application* of particular financing type
 
     + Attributes (Application)
 
+
++ Request Example_REPEATED_VALID_REQUEST (application/json; charset=utf-8)
+    + Attributes (ApplicationRequest)
+      + `customer` (Customer, required) - Customer information
+          + `addresses` (array[Address], required) - Addresses. Only `BILLING` and `DELIVERY` types are allowed.
+              + Sample
+                  + (object)
+                      + `name`: `John Newborn`
+                      + `country`: `CZ`
+                      + `city`: `Prague`
+                      + `streetAddress`: `Letenská`
+                      + `streetNumber`: `22`
+                      + `zip`: `140 00`
+                      + `addressType`: `CONTACT`
+
+
++ Response 200(application/json; charset=utf-8)
+
+        Application was created in the past (nothing changed)
+
+    + Attributes (Application)
+
+
+
++ Request Bad request (application/json; charset=utf-8)
+    + Attributes (ApplicationRequest)
+      + `type`: `INVALID_TYPE` (enum, required) - Financing type
+          + `INSTALLMENT` - Pay in monthly installments ("nákup na splátky")
 
 + Response 400(application/json; charset=utf-8)
 
@@ -457,7 +407,7 @@ Get specific *application* detail by ID
 
         Application does not exist
 
-    + Attributes (Errors)
+    + Attributes (ErrorsNotFound)
 
 
 ## Cancel application [/financing/v1/applications/{applicationId}/cancel]
@@ -474,7 +424,7 @@ If there is need to completely cancel customer's *order*, it is necessary to can
 | `PROCESSING`      | YES          |
 | `READY`           | YES          |
 
-If the request was successfully processed, you receive HTTP status code 200 and information about canceled *application* with at least following information in the response:
+If the request was successfully processed, you receive HTTP status code 200 and information about cancelled *application* with at least following information in the response:
 - Application unique ID
 - Application type
 - Application state
@@ -505,6 +455,12 @@ Cancel *application*.
         Application was cancelled
 
     + Attributes (Application)
+
+
++ Response 404(application/json; charset=utf-8)
+    Application was not found
+
+    + Attributes (ErrorsNotFound)
 
 
 + Response 422(application/json; charset=utf-8)
@@ -569,7 +525,7 @@ In other cases, you receive one of the following errors:
 ### Change application order [PUT]
 Change *order*. Used to change order number and/or variable symbol.
 
-+ Request (application/json; charset=utf-8)
++ Request Example_VALID_REQUEST (application/json; charset=utf-8)
     + Attributes (OrderChangeRequest)
 
 
@@ -578,9 +534,31 @@ Change *order*. Used to change order number and/or variable symbol.
     + Attributes (OrderExtended)
 
 
++ Request Example_INVALID_REQUEST (application/json; charset=utf-8)
+    + Attributes (OrderChangeRequest)
+        + reason: `Too long reason of change application order operation` (string, optional) - Reason of change.
+
++ Response 400(application/json; charset=utf-8)
+    Bad request.
+    + Attributes (Errors)
+
+
++ Request Example_APPLICATION_NOT_FOUND (application/json; charset=utf-8)
+    + Attributes (OrderChangeRequest)
+
++ Response 404(application/json; charset=utf-8)
+    Application not found.
+    + Attributes (ErrorsNotFound)
+
+
++ Request Example_NOT_SUPPORTED (application/json; charset=utf-8)
+    + Attributes (OrderChangeRequest)
+
 + Response 422(application/json; charset=utf-8)
     Order can not be changed.
-    + Attributes (Errors)
+    + Attributes (ErrorsNotSupported)
+
+
 
 
 ## Mark order as sent [/financing/v1/applications/{applicationId}/order/send]
@@ -784,7 +762,7 @@ Search for *order* using specified parameters.
 # Group Installments calculator resources
 When you want to provide your customer (that wants to pay for a purchase by a loan) an option to choose from available installment programs while he is still on your website, it is necessary to implement "installments calculator".
 
-Choose one of the following approaches to integrate installments calculator into your website:  
+Choose one of the following approaches to integrate installments calculator into your website:
 
 - A) Implementing your own installment calculator, with your FE in your design that uses designated API resources ([described below](#reference/installments-calculator-resources/implementing-own-installments-calculator)).
 - B) Integrating Home Credit's javascript widget (described in [special chapter](#reference/javascript-widget-integration)) that:
@@ -874,7 +852,7 @@ It returns the installment program that most closely matches specified input.
 
 + Response 200(application/json; charset=utf-8)
 Detailed information about installment program
-    + Attributes (InstallmentProgram)
+    + Attributes (InstallmentProgramDetail)
 
 + Response 422(application/json; charset=utf-8)
 No installment program was found
@@ -915,7 +893,7 @@ Error in processing request
 
 
 ## Group JavaScript widget integration
-In order to use Home Credit's javascript widget as an installment calculator, your e-shop back-end has to be configured properly. How to do it is currently described in separate document (currently written in Czech) "Základní informace k platební metodě HC On-line.docx" obtainable through a request at tomas.barta@homecredit.cz.  
+In order to use Home Credit's javascript widget as an installment calculator, your e-shop back-end has to be configured properly. How to do it is currently described in separate document (currently written in Czech) "Základní informace k platební metodě HC On-line.docx" obtainable through a request at integrace_eshop@homecredit.cz.
 
 
 # Group Health check
@@ -987,7 +965,7 @@ We use this resource when there is need to let you know about important changes 
 | ---                                                                 | ---                                   | ---                                                                                                     |
 | Application was approved (approval process is proceeding correctly) | PROCESSING_APPROVED                   | Do not cancel customer's order prematurely                                                              |
 | Application was rejected                                            | REJECTED                              | You should probably cancel respective order and release reserved goods                                  |
-| Application was cancelled (before delivery)                         | CANCELLED_NOT_PAID                    | You should probably cancel respective order and release reserved goods                                  |  
+| Application was cancelled (before delivery)                         | CANCELLED_NOT_PAID                    | You should probably cancel respective order and release reserved goods                                  |
 | Order to dispatch (we commit to finance customer's order)           | READY_TO_SHIP                         | Dispatch the order to the customer                                                                      |
 | Application is going to be paid out                                 | READY_PAID                            | Wait for us processing financial compensation with you                                                  |
 <!-- | Application was cancelled (after delivery)                          | CANCELLED_RETURNED                    | You should probably cancel respective order and process returning of the goods (if not already done so) |-->
@@ -996,7 +974,8 @@ We fill the request with at least following information:
 - Application unique ID
 - Application state
 - Application substate
-<!-- - Timestamp of the notification [TBD - not yet available] -->
+- Timestamp of the notification
+- Hashed message (check sum)
 
 > USEFUL NOTE: If you think it takes us unusually long time to send you particular notification, do not hesitate to use `/financing/v1/applications/{applicationId}` resource (where `{applicationId}` is the application ID you received in the response of `/financing/v1/applications` after its creation) to directly find out information you seek.
 
@@ -1004,7 +983,23 @@ We fill the request with at least following information:
 Notify partner about changes in application.
 
 + Request (application/json; charset=utf-8)
-    + Attributes (ApplicationBase)
+    + Attributes (NotificationRequest)
+        + `stateReason`: `PROCESSING_APPROVED` (enum, required) - Describes internal state of application, e.g. when state is PROCESSING - reason why application remains in processing state
+           + `PROCESSING_REDIRECT_NEEDED` - Redirect to HC is needed. Redirect user to `gatewayRedirectUrl`.
+           + `PROCESSING_NEW` - New application created
+           + `PROCESSING_PREAPPROVED` - Preliminary approval by HC
+           + `REJECTED` - Rejected by HC
+           + `PROCESSING_APPROVED` - Approved by HC, to be signed by client
+           + `PROCESSING_REVIEW` - Manual review by HC in progress
+           + `PROCESSING_ALT_OFFER` - Alternative offered to client
+           + `PROCESSING_SIGNED` - Signed by client, to verification by HC
+           + `CANCELLED_NOT_PAID` - Cancelled before delivery
+           + `READY_TO_SHIP` - Financing approved, goods ready to be shipped to client
+           + `READY_SHIPPED` - Goods shipped to client
+           + `READY_DELIVERING` - Verification of goods delivery
+           + `READY_DELIVERED` - Goods delivered to client
+           + `READY_PAID` - Paid to merchant
+           + `CANCELLED_RETURNED` - Cancelled after delivery, goods returned to merchant
 
 
 + Response 200 (application/json; charset=utf-8)
@@ -1021,18 +1016,6 @@ Notify partner about changes in application.
 
 # Data Structures
 
-## ApiInfo (object)
-API information
-
-### Properties
-+ `build` (object, required)
-    + `version`: `38.3.0-0-SNAPSHOT` (string, required) - ATL version
-    + `artifact`: `atl-cs-app` (string, required) - Maven artifact name
-    + `name`: `ATL CS - App` (string, required) - Official artifact name (human readable)
-    + `group`: `eu.homecredit.openapi-cs` (string, required) - Artifact group name
-    + `time`: 1510739838000 (number, required) - Artifact (build) creation time (timestamp)
-
-
 ## PartnerLogin (object)
 Partner login credentials
 
@@ -1047,75 +1030,29 @@ Authenticated partner access token
 + `accessToken`: `TokenForPartnerTokenForPartnerTokenForPartnerTokenForPartner` (string) - Access token
 + `expiresIn`: 7200 (number) - Token validity remaining time (in seconds)
 
-## DeliveryCarrier (object)
-Delivery carrier
+
+## ApplicationRequest (object)
+Financing application request
 
 ### Properties
-+ One Of
-    + carrierId (enum, required)
-        + CZ_POST_HAND - Czech Post, Parcel Delivery to Hand
-        + CZ_POST_OFFICE - Czech Post, Parcel Delivery to Post Office
-        + CZ_POST_OTHER - Czech Post, other service
-        + PPL
-        + DPD
-        + GEIS
-        + IN_TIME
-        + TOP_TRANS
-        + GEBRUDER_WEISS
-        + LOCAL_COURIER
-        + TNT
-        + GLS
-        + HDS_COMFORT
-        + HDS_STANDARD
-    + carrierCustom: `my custom carrier` (string, required) - For carriers not found in enumeration of customer ID, specify value as text
-
-
-## Address (object)
-Address
-
-### Properties
-+ `name`: `John Doe` (string, optional) - Name on address
-+ `country`: `CZ` (string, required)
-
-    Country.
-
-    (see [ISO 3166 alpha-2](https://en.wikipedia.org/wiki/ISO_3166-1_alpha-2))
-
-+ `city`: `Prague` (string, required) - City.
-+ `streetAddress`: `Letenská` (string, required) - Street/city part.
-+ `streetNumber`: `22` (string, required) - Street number
-+ `zip`: `140 00` (string, required) - Postal code
-+ `addressType` (enum, required) - Type of the address. Only some of the types are allowed in each context.
-    + `PERMANENT` - Permanent residential address
-    + `CONTACT` - Contact address
-    + `DELIVERY` - Delivery address
-    + `BILLING` - Billing address
-
-
-## Amount (object)
-Financial amount
-
-### Properties
-+ `amount`: 12590 (number, required) - Amount in minor units (12590 represents 125,90 CZK) [ISO 4217](https://en.wikipedia.org/wiki/ISO_4217)
-+ `currency`: `CZK` (string, required) - Amount currency. [ISO 4217](https://en.wikipedia.org/wiki/ISO_4217)
-
-## VatAmount (Amount)
-Financial amount with VAT rate.
-
-### Properties
-+ `vatRate`: 15 (number, required) - VAT rate as natural number (15 represents 15% rate)
++ `customer` (Customer, required) - Customer information
++ `order` (OrderBase, required) - Order information
++ `type` (enum, required) - Financing type
+    + `INSTALLMENT` - Pay in monthly installments ("nákup na splátky")
++ `settingsInstallment` (SettingsInstallment, optional) - Settings for INSTALLMENT Application type.
++ `merchantUrls` (MerchantUrls, required) - Collection of partner's URLs used for redirection of a customer back to a partner website or as a notification endpoint
 
 ## ApplicationBase (object)
 Financing application base information
 
 ### Properties
 + `id`: `01-11200a0ee1` (string, required) - Unique identifier in HCO
-+ `state` (enum, required) - Application state.
++ `state`: `PROCESSING` (enum, required) - Application state.
     + `PROCESSING` - Application is being processed by HC
     + `READY` - Application was approved and is ready for financing
     + `REJECTED` - Application was rejected
     + `CANCELLED` - Application was cancelled by client, either before approval or after delivery
-+ `stateReason`: `PROCESSING_APPROVED` (enum, required) - Describes internal state of application, e.g. when state is PROCESSING - reason why application remains in processing state
++ `stateReason`: `PROCESSING_REDIRECT_NEEDED` (enum, required) - Describes internal state of application, e.g. when state is PROCESSING - reason why application remains in processing state
     + `PROCESSING_REDIRECT_NEEDED` - Redirect to HC is needed. Redirect user to `gatewayRedirectUrl`.
     + `PROCESSING_PREAPPROVED` - Preliminary approval by HC
     + `REJECTED` - Rejected by HC
@@ -1136,19 +1073,12 @@ Financing application base information
 Financing application
 
 ### Properties
-+ `customer` (Customer, optional) - Customer data
-+ `order` (Order, optional) - Order data
-+ `type` (enum, optional) - Financing type
++ `customer` (CustomerBase, optional) - Customer data
++ `order` (Order, required) - Order data
++ `type`:  `INSTALLMENT` (enum, required) - Financing type
     + `INSTALLMENT` - Pay in monthly installments ("nákup na splátky")
-+ `settingsInstallment` (object, required) - Settings for INSTALLMENT Application type.
-    + `preferredMonths`: 10 (number, optional) - Preferred number of installments (in months)
-    + `preferredInstallment` (Amount, optional) - Preferred repayment amount
-    + `preferredDownPayment` (Amount, optional) - Preferred down payment amount (amount should be rounded to hundreds)
-    + `productCode`: `a122ax` (string, optional) - Product code, this indicates previous calculation result
-    + `productSetCode`: `bc11523` (string, optional) - Product set code, this will limit further calculations
-+ `agreementPersonalDataProcessing`: `true` (boolean, optional) - Flag indicating already approved personal data processing
-+ `agreementTermsAndConditions`: `true` (boolean, optional) - Flag indicating already approved terms and conditions
-+ `gatewayRedirectUrl` (string, optional) - Gateway redirect URL. Redirect user to this URL if `state` is `PROCESSING` and `stateReason` is `PROCESSING_REDIRECT_NEEDED`.
++ `settingsInstallment` (SettingsInstallment, optional) - Settings for INSTALLMENT Application type.
++ `gatewayRedirectUrl`: `https://www.ourloan.cz/application/11200a0ee1` (string, optional) - Gateway redirect URL. Redirect user to this URL if state is `PROCESSING` and stateReason is `PROCESSING_REDIRECT_NEEDED`.
 
 
 ## CustomerBase (object)
@@ -1156,40 +1086,19 @@ Customer data
 
 ### Properties
 + `firstName`: `John` (string, optional) -  Customer first (given) name. Must be paired with `lastName`. Required if `fullName` is empty.
-For [advanced implementation](#introduction/getting-started/advanced-implementation) should be matched by following regular expression `^[A-ZÁ-Ž]'?[-  a-zA-Zá-žÁ-Ž]*[a-zA-Zá-žÁ-Ž]$`.
 + `lastName`: `Newborn` (string, optional) - Customer last (family) name. Must be paired with `firstName`. Required if `fullName` is empty.
-For [advanced implementation](#introduction/getting-started/advanced-implementation) should be matched by following regular expression `^[A-ZÁ-Ž]'?[-  a-zA-Zá-žÁ-Ž]*[a-zA-Zá-žÁ-Ž]$`.
-+ `fullName`: `Ing. John Newborn, Csc.` (string, optional) - Customer full name, including academical degrees and salutation. Required only if `firstName` or `lastName` are empty.
-For [advanced implementation](#introduction/getting-started/advanced-implementation) should be matched by following regular expression (just the name without academical degrees) `^(?P<firstname>[A-ZÁ-Ž]'?[-  a-zA-Zá-žÁ-Ž]*[a-zA-Zá-žÁ-Ž])\s(?P<lastname>[A-ZÁ-Ž]'?[-  a-zA-Zá-žÁ-Ž]*[a-zA-Zá-žÁ-Ž])$`.
-+ `titleBefore`: `Ing.` (string, optional) - Academical degree, in front of the name
-+ `titleAfter`: `CSc.` (string, optional) - Academical degree, behind name
++ `fullName`: `Ing. John Newborn, Csc.` (string, optional) - Customer full name, including academical degrees and salutation. Required only if `firstName` and `lastName` are empty.
 + `email`: `john.newborn@country.com` (string, required) - E-mail address of customer
-+ `phone`: `+420123456789` (string, required) - Phone number with country code (including leading `+`)
++ `phone`: `+420777123456` (string, required) - Phone number with country code (including leading `+`)
 + `addresses` (array[Address], optional) - Addresses. All types are allowed.
 + `tin`: `12333321` (string, optional) - Tax identification number (ICO)
-+ `vatin`: `CZ8402154456` (string, optional) - VAT identification number
 
 ## Customer (CustomerBase)
 Customer data
 
 ### Properties
-+ `type` (enum, required) - Customer type.
-    + `UNKNOWN` - Customer is uknown for HCO.
-    + `FIRST_ORDER` - HCO knows the customer. Customer has no paid orders.
-    + `FULL` -  HCO knows the customer. Customer has at least one paid order.
-    + `BLOCKED` - HCO knows the customer. Customer is blocked.
-+ `dueDateCategory` (enum, required)
-    + `CATEGORY_CLASSIC` - customer with classic due date (14 days, with the exception of events (Christmas, etc.))
-    + `CATEGORY_EXTENDED` - customer with extended due date (20th day of next month, with the exception of events (Christmas, etc.))
-+ `ordersCountLimit`: 4 (number, optional) - The maximum orders count that the customer can make. Not set if there is no limit.
-+ `ordersCountRemaining`: 2 (number, optional) - The remaining orders count that the customer can make. Not set if there is no limit.
-
-## ApplicationRequestCustomer (CustomerBase)
-Customer data
-
-### Properties
-+ `ipAddress`: `172.10.10.1` (string, optional) - IPv4 or IPv6 address of a customer. Required for [Advanced implementation](#introduction/getting-started/advanced-implementation).
-+ `fingerprintComponents` (array[KeyValue], optional) - Fingerprints components.  Required for [Advanced implementation](#introduction/getting-started/advanced-implementation). Fill this property with data created with HCO JS library.
++ `ipAddress`: `172.10.10.1` (string, optional) - IPv4 or IPv6 address of a customer.
++ `fingerprintComponents` (array[KeyValue], optional) - Fingerprints components.  Fill this property with data created with HCO JS library.
 + `extraData` (CustomerExtraData, optional) - Additional data, that may improve the approval probability.
 
 
@@ -1206,6 +1115,15 @@ Customer data
 + `pageReviewsTime`: 100 (number, optional) - Total time spent on partners website in review and comments sections (in seconds)
 + `cartItemsRemoved`: 2 (number, optional) - Total count of removed items form shopping basket during current shopping
 + `itemsViewed`: 10 (number, optional) - Number of viewed pages with products
+
+
+## OrderChangeRequest (object)
++ order (OrderChange, required) - Changed order data.
++ reason (string, optional) - Reason of change.
+
+## OrderChange (object)
++ `number`: `AA234` (string, optional) - Order number (internal for e-shop)
++ `variableSymbols`: `123456`, `1234567` (array[string], optional) - Variable symbols (internal for e-shop)
 
 
 ## ApplicationCancelRequest (object)
@@ -1229,35 +1147,30 @@ Order information, needed to create an application.
 
 ### Properties
 + `number`: `AA234` (string, required) - Order number (internal for e-shop)
-+ `variableSymbols` (array[string], optional) - Variable symbols (internal for e-shop). The first VS in this array is used as the VS of the reconciliation payment.
++ `variableSymbols`: `123456`, `1234567` (array[string], optional) - Variable symbols (internal for e-shop). For the financing type `INSTALLMENT` the first VS in this array is used as the VS of the reconciliation payment.
 + `totalPrice` (Amount, required) - Total order amount, including VAT
 + `totalVat` (array[VatAmount], required) - Total VAT amounts split by their VAT rates
 + `addresses` (array[Address], required) - Addresses. Only `BILLING` and `DELIVERY` types are allowed.
-+ `deliveryType` (enum, optional) - Delivery type, for `DELIVERY_CARRIER` type can be further specified by `deliveryCarrier` attribute.
-    + `DELIVERY_CARRIER` - If delivered by carrier - use `deliveryCarrier` for further specification.
++ `deliveryType`:`PERSONAL_BRANCH` (enum, optional) - Delivery type.
+    + `DELIVERY_CARRIER`
     + `PERSONAL_BRANCH` - Personal collection at branch
     + `PERSONAL_PARTNER` - Personal collection at partner network
     + `ONLINE` - Online delivery (e.g. for intangible assets)
-+ `deliveryCarrier` (DeliveryCarrier, optional) - Delivery carrier, when applicable.
 + `reservationDate`: `2017-07-15T00:00:00+02:00` (string, optional) - Date and time until order is reserved. After this date and time, e-shop does not guarantee items availability (e.g. if application processing is longer, it may endanger order fullfillment).
 + `items` (array[ApplicationRequestOrderItem], required) - Order items
-+ `documents` (array[Document], optional) - Attached documents (invoices etc.)
 
 
 ## Order (OrderBase)
 Order information.
 
 ### Properties
-+ `state` (enum, required) - Order state.
++ `state`: `PROCESSING` (enum, required) - Order state.
     + `PROCESSING` - Order is being processed by merchant
     + `SENT` - All order items was sent to customer
     + `DELIVERED` - All order items was delivered to customer
     + `RETURNED` - All order items was returned to merchant
     + `CANCELLED` - Order was fully cancelled
 + `items` (array[OrderItem], required) - Order items
-+ `deliveryDate`: `2017-01-17T00:00:00+02:00` (string, optional) - Date and time of delivery
-+ `deliveryTrackingNumber`: `EX12221` (string, optional) - Delivery tracking number
-+ `sentDate`: `2017-01-12T00:00:00+02:00` (string, optional) - Date and time of order shipping
 
 ## OrderExtended (Order)
 Additional information about Application.
@@ -1279,7 +1192,7 @@ Order item base information, needed to identify order item
 Order item information, needed to create an application.
 
 ### Properties
-+ `type` (enum, optional) - Item type
++ `type`: `PHYSICAL` (enum, optional) - Item type
     + `PHYSICAL`
     + `DISCOUNT`
     + `SHIPPING_FEE`
@@ -1289,183 +1202,131 @@ Order item information, needed to create an application.
     + `STORE_CREDIT`
     + `FEE`
     + `INSURANCE`
-+ `variant`: `32GB SpaceGray` (string, optional) - Item variant
-+ `description`: `Mobile phone with 32GB of RAM` (string, optional)
 + `producer`: `Apple` (string, optional)
-+ `categories`: `mobile phones`,`FullHD`, `64GB` (array[string], optional) - List of item categories
 + `unitPrice` (Amount, optional) - Price per one piece. If empty, automatically considered that `unitPrice` is `totalPrice` / `quantity`.
 + `unitVat` (VatAmount, optional) - VAT amount per one piece. If empty, automatically considered that `unitVat` is `totalVat` / `quantity`.
 + `totalPrice` (Amount, required) - Total price for all pieces, VAT inclusive
 + `totalVat` (VatAmount, required) - Total VAT amount for all pieces
 + `image` (File, optional) - Item image
-+ `productUrl`: `https://www.example.com?itemId=10` (string, optional) - URL of the item in e-shop
 
 
 ## OrderItem (ApplicationRequestOrderItem)
 Order item information.
 
 ### Properties
-+ `state` (enum, required) - Order state.
++ `state`: `PROCESSING` (enum, required) - Order state.
     + `PROCESSING` - Oorder item delivery is being processed by merchant
     + `SENT` - Items wa sent to customer
     + `DELIVERED` - Order item was delivered to customer
     + `RETURNED` - Order item was returned to merchant
     + `CANCELLED` - Order item was cancelled
-+ `sentDate`: `2017-01-10` (string, optional) - Date when item was sent. Only when the whole order was NOT sent at once.
-+ `deliveryDate`: `2017-01-12` (string, optional) - Date when item was delivered. Only when the whole order was NOT sent at once.
-+ `deliveryTrackingNumber`: `EX21121` (string, optional) - Tracking number for the item. Only when the whole order was NOT sent at once.
+
+## SettingsInstallment (object)
++ `preferredMonths`: 6 (number, optional) - Preferred number of installments (in months)
++ `preferredInstallment` (Amount, optional) - Preferred repayment amount
+    + `amount`: 221900 (number, required) - Amount in minor units (221900 represents 2219 CZK) [ISO 4217](https://en.wikipedia.org/wiki/ISO_4217)
++ `preferredDownPayment` (Amount, optional) - Preferred down payment amount (amount should be rounded to hundreds)
+    + `amount`: 0 (number, required) - Amount in minor units (12590 represents 125,90 CZK) [ISO 4217](https://en.wikipedia.org/wiki/ISO_4217)
++ `productCode`: `COCONL06` (string, optional) - Product code, this indicates previous calculation result
++ `productSetCode`: `COCHCONL` (string, optional) - Product set code, this will limit further calculations
 
 
-## OrderChangeRequest (object)
-+ order (OrderChange, required) - Changed order data.
-+ reason (string, optional) - Reason of change.
-
-## OrderChange (object)
-+ `number`: `AA234` (string, optional) - Order number (internal for e-shop)
-+ `variableSymbols` (array[string], optional) - Variable symbols (internal for e-shop)
-
-
-## File (object)
+## Address (object)
+Address
 
 ### Properties
-+ `filename`: `invoice.pdf` (string, required) - File name.
-+ One Of
-    + `content`: `RmlsZSBjb250ZW50cy4gwq9cXyjjg4QpXy/Crw==` (string, required) - File content (Base64 encoded, maximum size of encoded string is 500kB)
-    + `url`: `https://www.partner.com/file?id=12345` (string, required) - File URL.
++ `name`: `John Newborn` (string, optional) - Name on address
++ `country`: `CZ` (string, required)
+    Country.
+    (see [ISO 3166 alpha-2](https://en.wikipedia.org/wiki/ISO_3166-1_alpha-2))
 
-
-## Document (object)
-Attached document (e.g. invoice, credit note etc.)
-
-### Properties
-+ `type` (enum, required) - Type of the document
-    + `INVOICE` - Invoice
-    + `PROFORMA_INVOICE` - Proforma invoice
-    + `CREDIT_NOTE` - Credit note
-    + `OTHER` - Other document type
-+ `file` (File, required) - Attached file
-+ `description`: `This is an invoice` (string, optional) - File description
-+ `extraData` (DocumentExtraData, optional) - Additional data, if applicable
-
-
-## DocumentExtraData (object)
-
-### Properties
-+ `variableSymbol`: `1234567890` (string, optional) - variable symbol (internal for e-shop)
-
-
-## AccountNumber (object)
-Account number with bank code.
-
-### Properties
-+ `accountNumber`: `123-123456789` (string, required) - Account number (IBAN, BIC, etc.).
-+ `bankCode`: `0100` (string, required) - Bank code (SWIFT, etc.).
-
-
-## InstallmentProgram (object)
-Installment programs
-
-### Properties
-+ `productCode`: `a122ax` (string, required) - Installment program product code
-+ `type` (enum, optional) - Program type
-    + MINIMAL - Lowest installment
-    + FAVOURITE - Recommended (favourite) installment program
-    + OTHER - Other
-+ `installment` (Amount, optional) - monthly installment amount
-+ `numberOfInstallments`: 10 (number, optional) - installment count
-+ `detail` (Detail, optional)
-    Calculation detailed information.
-    Only available for calculations received by calling `POST /installmentPrograms`
-    Not available for `POST /installmentProgramsOffers/`
-
-
-## InstallmentPrograms (object)
-+ `installmentPrograms` (array[InstallmentProgram], fixed-type, required) - Array with installment programs offer
-
-
-## Detail (object)
-
-### Properties
-+ `installmentDay`: 20 (number, optional)
-    Installment date (day in month)
-
-+ `installmentFirstDate`: `2017-05-20` (string, optional)
-    Date of the first installment
-
-+ `installmentLastDate`: `2018-03-20` (string, optional)
-    Date of the last installment
-
-+ `annualInterestRate`: 0.17 (number, optional)
-    Annual interest rate
-
-+ `predictedProvisionDate`: `2017-05-20` (string, optional)
-    Predicted provision date
-
-+ `paidBack` (Amount, optional) - Total amount paid by customer
-+ `rpsn`: 0.23 (number, optional)
-    RPSN
-
-+ `legalline`: "Uvedené hodnoty jsou spočítány k datu poskytnutí 18.1.2017, datu 1. splátky 20.1.2017 a se splatností všech dalších splátek k 20. dni v měsíci počítaje 20.1.2017. Nejedná se o nabídku či veřejnou nabídku. Platí při splnění podmínek Home Credit...." (string, optional)
-    Text interpretation of the offer
-
-
-## InstallmentProgramsDownPayments (object)
-Down payments information - the lowest down payment possible, the maximum down payment possible and a size of one step between them.
-
-### Properties
-+ `minimum` (Amount, optional)
-    The lowest down payment amount
-    e.g. 0 (0 Kč)
-+ `maximum` (Amount, optional)
-    Maximum down payment amount
-    e.g. 2500 (2 500 Kč)
-+ `step` (Amount, optional)
-    Size of one step between the lowest and maximum down payment amounts
-    e.g. 500 (500 Kč)
-    Available down payments could be (min 0, max 2500):
-    0, 500, 1000, 1500, 2000, 2500
++ `city`: `Prague` (string, required) - City.
++ `streetAddress`: `Letenská` (string, required) - Street/city part.
++ `streetNumber`: `22` (string, required) - Street number
++ `zip`: `140 00` (string, required) - Postal code
++ `addressType`: `DELIVERY` (enum, required) - Type of the address. Only some of the types are allowed in each context.
+    + `PERMANENT` - Permanent residential address
+    + `CONTACT` - Contact address
+    + `DELIVERY` - Delivery address
+    + `BILLING` - Billing address
 
 
 ## MerchantUrls (object)
 Collection of URLs used for redirection of a customer back to a partner website or as a notification endpoint
 
 ### Properties
-+ `approvedRedirect` (string, required) - URL of the partner used for redirection of the customer back to partner website (from HCO gateway) after application approval. Do not implement any business logic on accessing this URL by customer. Implement business logic to READY notification via `notificationEndpoint`.
-+ `rejectedRedirect` (string, required) - URL of the partner used for redirection of the customer back to partner website (from HCO gateway) after application rejection.  Do not implement any business logic on accessing this URL by customer. Implement business logic to REJECTED notification via `notificationEndpoint`.
-+ `notificationEndpoint` (string, required) - URL of the partner used as a notification endpoint for obtaining important updates about application (approval, rejection, storno, etc.).
-+ `paymentsEndpoint` (string, optional) - URL of the partner used as a notification endpoint for obtaining information about payments connected with application.
-+ `changeEndpoint` (string, optional) - URL of the partner used as a endpoint for processing information about order changes made by customer in HC.
++ `approvedRedirect`: `https://www.youreshop.cz` (string, required) - URL of the partner used for redirection of the customer back to partner website (from HCO gateway) after application approval. Do not implement any business logic on accessing this URL by customer. Implement business logic to READY notification via `notificationEndpoint`.
++ `rejectedRedirect`: `https://www.youreshop.cz/kosik` (string, required) - URL of the partner used for redirection of the customer back to partner website (from HCO gateway) after application rejection.  Do not implement any business logic on accessing this URL by customer. Implement business logic to REJECTED notification via `notificationEndpoint`.
++ `notificationEndpoint`: `https://www.youreshop.cz/order/AA234` (string, required) - URL of the partner used as a notification endpoint for obtaining important updates about application (approval, rejection, storno, etc.).
 
 
-## ApplicationRequest (object)
-Financing application request
+## File (object)
 
 ### Properties
-+ `customer` (ApplicationRequestCustomer, required) - Customer information
-+ `order` (OrderBase, required) - Order information
-+ `type` (enum, required) - Financing type
-    + `INSTALLMENT` - Pay in monthly installments ("nákup na splátky")
-+ `settingsInstallment` (object, required) - Settings for INSTALLMENT Application type.
-    + `preferredMonths`: 10 (number, optional) - Preferred number of installments (in months)
-    + `preferredInstallment` (Amount, optional) - Preferred repayment amount
-    + `preferredDownPayment` (Amount, optional) - Preferred down payment amount (amount should be rounded to hundreds)
-    + `productCode`: `a122ax` (string, optional) - Product code, this indicates previous calculation result
-    + `productSetCode`: `bc11523` (string, optional) - Product set code, this will limit further calculations
-+ `agreementPersonalDataProcessing`: `true` (boolean, optional) - Personal data processing agreement
-+ `agreementTermsAndConditions`: `true` (boolean, optional) - Terms and conditions agreement
-+ `merchantUrls` (MerchantUrls, required) - Collection of partner's URLs used for redirection of a customer back to a partner website or as a notification endpoint
++ `filename`: `iphone6s.jpg` (string, required) - File name.
++ One Of
+    + `url`: `https://i.cdn.nrholding.net/32523771/2000/2000` (string, required) - File URL.
+    + `content`: `RmlsZSBjb250ZW50cy4gwq9cXyjjg4QpXy/Crw==` (string, required) - File content (Base64 encoded, maximum size of encoded string is 500kB)
+
+
+## InstallmentPrograms (object)
++ `installmentPrograms` (array[InstallmentProgram], fixed-type, required) - Array with installment programs offer
+
+
+## InstallmentProgram (object)
+Installment programs
+
+### Properties
++ `productCode`: `COCONL06` (string, required) - Installment program product code
++ `type`: `FAVOURITE` (enum, optional) - Program type
+    + `MINIMAL` - Lowest installment
+    + `FAVOURITE` - Recommended (favourite) installment program
+    + `OTHER` - Other
++ `installment` (Amount, optional) - monthly installment amount
+    + `amount`: 221900 (number, required) - Amount in minor units (250000 represents 2500 CZK) [ISO 4217](https://en.wikipedia.org/wiki/ISO_4217)
++ `numberOfInstallments`: 6 (number, optional) - installment count
+
+
+## InstallmentProgramDetail (InstallmentProgram)
++ `detail` (CalculationDetail, optional) - Calculation detailed information.
+
+
+## CalculationDetail (object)
++ `installmentDay`: 20 (number, optional) - Installment date (day in month)
++ `installmentFirstDate`: `2018-09-20` (string, optional) - Date of the first installment
++ `installmentLastDate`: `2019-02-20` (string, optional) - Date of the last installment
++ `annualInterestRate`: 0.1743 (number, optional) - Annual interest rate
++ `predictedProvisionDate`: `2018-08-10` (string, optional) - Predicted provision date
++ `paidBack` (Amount, optional) - Total amount paid by customer
+    + `amount`: 1331400 (number, required) - Amount in minor units (250000 represents 2500 CZK) [ISO 4217](https://en.wikipedia.org/wiki/ISO_4217)
++ `rpsn`: 0.19 (number, optional) - RPSN
++ `legalline`: "Každou žádost posuzujeme individuálně a uvedené hodnoty jsme vám spočítali na míru.\nPlatí pro čerpání k 10.08.2018, datum první splátky je k 20.09.2018 a datum dalších splátek vždy k 20. dni v měsíci, počínaje 20.10.2018 a při lhůtě splatnosti 20.02.2019." (string, optional) - Text interpretation of the offer
+
+
+## InstallmentProgramsDownPayments (object)
+Down payments information - the lowest down payment possible, the maximum down payment possible and a size of one step between them.
+
+### Properties
++ `minimum` (Amount, optional) - The lowest down payment amount, e.g. 0 (0 Kč)
+    + `amount`: 0 (number, required) - Amount in minor units [ISO 4217](https://en.wikipedia.org/wiki/ISO_4217)
++ `maximum` (Amount, optional) - Maximum down payment amount, e.g. 2500 (2 500 Kč)
+    + `amount`: 250000 (number, required) - Amount in minor units (250000 represents 2500 CZK) [ISO 4217](https://en.wikipedia.org/wiki/ISO_4217)
++ `step` (Amount, optional) - Size of one step between the lowest and maximum down payment amounts, e.g. 500 (500 Kč). Available down payments could be (min 0, max 2500): 0, 500, 1000, 1500, 2000, 2500
+    + `amount`: 50000 (number, required) - Amount in minor units (50000 represents 500 CZK) [ISO 4217](https://en.wikipedia.org/wiki/ISO_4217)
 
 
 ## InstallmentProgramsRequest (object)
-+ `productCode`: `a122ax` (string, required) - Product code, this indicates previous calculation result
++ `productCode`: `COCONL06` (string, required) - Product code, this indicates previous calculation result
 + `price` (Amount, required) - Goods price
 + `downPayment` (Amount, optional) - Down payment amount (default is 0, amount should be rounded to hundreds)
+    + `amount`: 0 (number, required) - Amount in minor units [ISO 4217](https://en.wikipedia.org/wiki/ISO_4217)
 
 
 ## InstallmentProgramsOffersRequest (object)
 + `productSetCode`: `COCHCONL` (string, optional) - Product set code, this will limit further calculations. If not provided, default productSet will be used.
 + `price` (Amount, required) - Order price
 + `downPayment` (Amount, optional) - Down payment amount (default is 0, amount should be rounded to hundreds)
+    + `amount`: 0 (number, required) - Amount in minor units [ISO 4217](https://en.wikipedia.org/wiki/ISO_4217)
 
 
 ## InstallmentProgramsDownPaymentsRequest (object)
@@ -1473,23 +1334,89 @@ Financing application request
 + `price` (Amount, required) - Goods price
 
 
+## Amount (object)
+Financial amount
+
+### Properties
++ `amount`: 1259950 (number, required) - Amount in minor units (1259950 represents 12599,50 CZK) [ISO 4217](https://en.wikipedia.org/wiki/ISO_4217)
++ `currency`: `CZK` (string, required) - Amount currency. [ISO 4217](https://en.wikipedia.org/wiki/ISO_4217). Currenty only CZK is allowed.
+
+
+## VatAmount (Amount)
+Financial amount with VAT rate.
+
+### Properties
++ `amount`: 188992 (number, required) - Amount in minor units (188992 represents 1889,92 CZK) [ISO 4217](https://en.wikipedia.org/wiki/ISO_4217)
++ `vatRate`: 15 (number, required) - VAT rate as natural number (15 represents 15% rate)
+
+
+## ApiInfo (object)
+API information
+
+### Properties
++ `build` (object, required)
+    + `version`: `38.3.0-0-SNAPSHOT` (string, required) - ATL version
+    + `artifact`: `atl-cs-app` (string, required) - Maven artifact name
+    + `name`: `ATL CS - App` (string, required) - Official artifact name (human readable)
+    + `group`: `eu.homecredit.openapi-cs` (string, required) - Artifact group name
+    + `time`: 1510739838000 (number, required) - Artifact (build) creation time (timestamp)
+
+
+
+## NotificationRequest (ApplicationBase)
++ `orderNumber`: `AA234` (string, required) - Order number (internal for e-shop)
++ `notificationDate`: `2017-07-15T00:00:00+02:00` (string, required) – Date of change of application status.
++ `orderState` (enum, required) - Order state.
+    + `PROCESSING` - Order is being processed by merchant
+    + `SENT` - All order items was sent to customer
+    + `DELIVERED` - All order items was delivered to customer
+    + `RETURNED` - All order items was returned to merchant
+    + `CANCELLED` - Order was fully cancelled
++ `sentDate`: `2017-07-16T00:00:00+02:00` (string, required) – Date of sending notification (=actual date).
++ `checkSum`: `443E150D3406F6A8DC62C1DB224AFDD84FA9907071BB1AD9B2C7701031793662191501B26AADF3A31361341EA176C80B23D8A9A5E5B5219538289945FE0C20A7` (string, required) – Hashed message
++ `sequenceNumber`: 1 (number, required) - Sequence number of notification for corresponding application. Starts at value of 1.
+
 ## KeyValue (object)
-+ `key`: `property` (string, required) - Key
++ `key`: `user_agent` (string, required) - Key
 + `value` (object, required) - Value
+    + Sample
+      + (object)
+          + `Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/60.0.3112.91 Safari/537.36 Vivaldi/1.92.917.39`
+      + (object)
+          + `[1920,1040]`
 
 
 ## Error (object)
-+ code: `ERR_1000_SOME_ERROR_CODE` (string, required) - Unique internal error code
-+ message: `Some error/validation message description` (string, required) - Human readable error description (non-localized)
-+ severity (enum, required)
-    + ERROR - Critical error, execution cannot continue. This MUST be indicated also by appropriate HTTP status code
-    + WARN - Non-critical error, execution can continue but further user interaction is advisable. This MIGHT be indicated also by appropriate HTTP status code
-    + INFO - Information only, execution can continue without user interaction
-+ attribute: `personalBirthNumber` (string, optional) - JSON path of request attribute that caused the error (if applicable)
-+ ticketId: `UAT1:AMS:20160516-091658.450:45e4` (string, optional) - Internal ticket ID, used for error backtracking
++ code: `BAD_REQUEST` (string, required) - Unique internal error code
++ message: `Bad request` (string, required) - Human readable error description (non-localized)
++ severity: `ERROR` (enum, required)
+    + `ERROR` - Critical error, execution cannot continue. This MUST be indicated also by appropriate HTTP status code
+    + `WARN` - Non-critical error, execution can continue but further user interaction is advisable. This MIGHT be indicated also by appropriate HTTP status code
+    + `INFO` - Information only, execution can continue without user interaction
++ attribute (string, optional) - JSON path of request attribute that caused the error (if applicable)
++ ticketId (string, optional) - Internal ticket ID, used for error backtracking
 
 ## Errors (object)
 + errors (array[Error], fixed-type, required) - Array with errors
+
+
+
+## ErrorNotFound (Error)
++ code: `APPLICATION_NOT_FOUND` (string, required) - Unique internal error code
++ message: `Application 'NONEXISTING_APPLICATION' not found` (string, required) - Human readable error description (non-localized)
+
+## ErrorsNotFound (object)
++ errors (array[ErrorNotFound], fixed-type, required) - Array with errors
+
+
+## ErrorNotSupported (Error)
++ code: `NOT_SUPPORTED` (string, required) - Unique internal error code
++ message: `Current application status not allows requested operation` (string, required) - Human readable error description (non-localized)
+
+
+## ErrorsNotSupported (object)
++ errors (array[ErrorNotSupported], fixed-type, required) - Array with errors
+
 
 ## PagingInfo (object)
 + itemsPerPage: 10 (number, required) - Number of items per page
