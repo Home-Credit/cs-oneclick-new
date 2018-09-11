@@ -312,7 +312,7 @@ Create new *application* of particular financing type
 + Request Example_VALID_REQUEST (application/json; charset=utf-8)
     + Attributes (ApplicationRequest)
       + `customer` (Customer, required) - Customer information
-          + `addresses` (array[Address], required) - Addresses. Only `BILLING` and `DELIVERY` types are allowed.
+          + `addresses` (array[Address], fixed-type, required) - Addresses. Only `BILLING` and `DELIVERY` types are allowed.
               + Sample
                   + (object)
                       + `name`: `John Newborn`
@@ -333,7 +333,7 @@ Create new *application* of particular financing type
 + Request Example_REPEATED_VALID_REQUEST (application/json; charset=utf-8)
     + Attributes (ApplicationRequest)
       + `customer` (Customer, required) - Customer information
-          + `addresses` (array[Address], required) - Addresses. Only `BILLING` and `DELIVERY` types are allowed.
+          + `addresses` (array[Address], fixed-type, required) - Addresses. Only `BILLING` and `DELIVERY` types are allowed.
               + Sample
                   + (object)
                       + `name`: `John Newborn`
@@ -1090,7 +1090,7 @@ Customer data
 + `fullName`: `Ing. John Newborn, Csc.` (string, optional) - Customer full name, including academical degrees and salutation. Required only if `firstName` and `lastName` are empty.
 + `email`: `john.newborn@country.com` (string, required) - E-mail address of customer
 + `phone`: `+420777123456` (string, required) - Phone number with country code (including leading `+`)
-+ `addresses` (array[Address], optional) - Addresses. All types are allowed.
++ `addresses` (array[Address], fixed-type, optional) - Addresses. All types are allowed.
 + `tin`: `12333321` (string, optional) - Tax identification number (ICO)
 
 ## Customer (CustomerBase)
@@ -1098,7 +1098,7 @@ Customer data
 
 ### Properties
 + `ipAddress`: `172.10.10.1` (string, optional) - IPv4 or IPv6 address of a customer.
-+ `fingerprintComponents` (array[KeyValue], optional) - Fingerprints components.  Fill this property with data created with HCO JS library.
++ `fingerprintComponents` (array[KeyValue], fixed-type, optional) - Fingerprints components.  Fill this property with data created with HCO JS library.
 + `extraData` (CustomerExtraData, optional) - Additional data, that may improve the approval probability.
 
 
@@ -1123,7 +1123,7 @@ Customer data
 
 ## OrderChange (object)
 + `number`: `AA234` (string, optional) - Order number (internal for e-shop)
-+ `variableSymbols`: `123456`, `1234567` (array[string], optional) - Variable symbols (internal for e-shop)
++ `variableSymbols`: `123456`, `1234567` (array[string], fixed-type, optional) - Variable symbols (internal for e-shop)
 
 
 ## ApplicationCancelRequest (object)
@@ -1147,17 +1147,17 @@ Order information, needed to create an application.
 
 ### Properties
 + `number`: `AA234` (string, required) - Order number (internal for e-shop)
-+ `variableSymbols`: `123456`, `1234567` (array[string], optional) - Variable symbols (internal for e-shop). For the financing type `INSTALLMENT` the first VS in this array is used as the VS of the reconciliation payment.
++ `variableSymbols`: `123456`, `1234567` (array[string], fixed-type, optional) - Variable symbols (internal for e-shop). For the financing type `INSTALLMENT` the first VS in this array is used as the VS of the reconciliation payment.
 + `totalPrice` (Amount, required) - Total order amount, including VAT
-+ `totalVat` (array[VatAmount], required) - Total VAT amounts split by their VAT rates
-+ `addresses` (array[Address], required) - Addresses. Only `BILLING` and `DELIVERY` types are allowed.
++ `totalVat` (array[VatAmount], fixed-type, required) - Total VAT amounts split by their VAT rates
++ `addresses` (array[Address], fixed-type, required) - Addresses. Only `BILLING` and `DELIVERY` types are allowed.
 + `deliveryType`:`PERSONAL_BRANCH` (enum, optional) - Delivery type.
     + `DELIVERY_CARRIER`
     + `PERSONAL_BRANCH` - Personal collection at branch
     + `PERSONAL_PARTNER` - Personal collection at partner network
     + `ONLINE` - Online delivery (e.g. for intangible assets)
 + `reservationDate`: `2017-07-15T00:00:00+02:00` (string, optional) - Date and time until order is reserved. After this date and time, e-shop does not guarantee items availability (e.g. if application processing is longer, it may endanger order fullfillment).
-+ `items` (array[ApplicationRequestOrderItem], required) - Order items
++ `items` (array[ApplicationRequestOrderItem], fixed-type, required) - Order items
 
 
 ## Order (OrderBase)
@@ -1170,7 +1170,7 @@ Order information.
     + `DELIVERED` - All order items was delivered to customer
     + `RETURNED` - All order items was returned to merchant
     + `CANCELLED` - Order was fully cancelled
-+ `items` (array[OrderItem], required) - Order items
++ `items` (array[OrderItem], fixed-type, required) - Order items
 
 ## OrderExtended (Order)
 Additional information about Application.
