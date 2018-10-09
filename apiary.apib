@@ -286,7 +286,7 @@ Use `/financing/v1/applications` resource with properly filled request that cont
   - Your URL where the customer should be redirected after application approval
   - Your URL where the customer should be redirected after application rejection
   - URL of your notification endpoint you want us to send you notifications about particular application updates
-> \* = Required in case customer has already used installment calculator embedded on your website and selected preferred installment program. See the [Installments calculator resources section](#reference/installments-calculator-resources) for more details about possibility to embed installment calculator on your website. Otherwise optional (except).
+> \* = Must be filled properly in case customer has already used installment calculator embedded on your website and selected preferred installment program. See the [Installments calculator resources section](#reference/installments-calculator-resources) for more details about possibility to embed installment calculator on your website. Leave empty otherwise.
 
 If the request was successfully processed, you receive HTTP status code 201 and *application* object with at least following information in the response:
 - Application unique ID
@@ -1039,7 +1039,7 @@ Financing application request
 + `order` (OrderBase, required) - Order information
 + `type` (enum, required) - Financing type
     + `INSTALLMENT` - Pay in monthly installments ("nákup na splátky")
-+ `settingsInstallment` (SettingsInstallment, optional) - Settings for INSTALLMENT Application type.
++ `settingsInstallment` (SettingsInstallment, required) - Settings for INSTALLMENT Application type.
 + `merchantUrls` (MerchantUrls, required) - Collection of partner's URLs used for redirection of a customer back to a partner website or as a notification endpoint
 
 ## ApplicationBase (object)
@@ -1077,7 +1077,7 @@ Financing application
 + `order` (Order, required) - Order data
 + `type`:  `INSTALLMENT` (enum, required) - Financing type
     + `INSTALLMENT` - Pay in monthly installments ("nákup na splátky")
-+ `settingsInstallment` (SettingsInstallment, optional) - Settings for INSTALLMENT Application type.
++ `settingsInstallment` (SettingsInstallment, required) - Settings for INSTALLMENT Application type.
 + `gatewayRedirectUrl`: `https://www.ourloan.cz/application/11200a0ee1` (string, optional) - Gateway redirect URL. Redirect user to this URL if state is `PROCESSING` and stateReason is `PROCESSING_REDIRECT_NEEDED`.
 
 
