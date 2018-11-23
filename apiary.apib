@@ -3,7 +3,7 @@ HOST: https://api.homecredit.cz
 
 # CS - OneClick API - Installments
 API documentation for Home Credit One-Click API.
-> Version of documentation: `1.07.18.cf27a2822b384b8fe61bd5d3a7988d4db29506c7`
+> Version of documentation: `1.11.08.8f4ea8809088b267021ec353c038190fb39d6c7c`
 
 In case of any question, please contact our integration department (integrace_eshop@homecredit.cz).
 
@@ -12,13 +12,13 @@ This online document describes Home Credit (HC) One-Click API - the means for pa
 
 The aim of here described services is to allow customers the smooth running through the process of an online purchase. The services that allow achieving this goal are divided into the following groups:
 
-| Group of services                  | Purpose                                                                                                                                                                                           |
-| ---                                | ---                                                                                                                                                                                               |
-| Security                           | Security rules and principles                                                                                                                                                                     |
-| Application resources              | Services that allows processing of *application* and *order* during their whole life cycle                                                                                                         |
-| Installments calculator resources  | Services that allow partner e-shops to implement an installment calculator on their websites                                                                                                      |
-| Merchantsite resources             | Services that should be developed and exposed by partner e-shops to allow HC asynchronously inform these partner e-shops about important changes regarding particular *applications* and *orders* |
-| Health check                       | Health check usage description                                                                                                                                                                    |
+| Group of services                  | Purpose                                                                                                                                                                                            |
+| ---                                | ---                                                                                                                                                                                                |
+| Security                           | Security rules and principles                                                                                                                                                                      |
+| Application resources              | Resources that allows processing of *application* and *order* during their whole life cycle                                                                                                        |
+| Installments calculator resources  | Resources that allow partner e-shops to implement an installment calculator on their websites                                                                                                      |
+| Merchantsite resources             | Resources that should be developed and exposed by partner e-shops to allow HC asynchronously inform these partner e-shops about important changes regarding particular *applications* and *orders* |
+| Health check                       | Health check usage description                                                                                                                                                                     |
 
 ### Basic implementation
 Basic and minimum way how to implement HCO API is to at least implement:
@@ -176,12 +176,6 @@ There are 3 levels of error severity:
 - all values in request/response attributes are just examples, except for enum values - these are the only possible values for given attribute.
 
 
-# Group Testing & Integration
-This section should help new partner's e-shop developers with better understanding of the API and connected processes especially during early stages of the API integration.
-
-> Temporarily described in separate document (currently written in Czech) "Základní informace k platební metodě HC On-line.docx" obtainable through a request at integrace_eshop@homecredit.cz.
-
-
 # Group Security
 To access our API, you have to obtain *access token* first; this token is a string of arbitrary length (30+ chars) and it has to be included in HTTP header to every request to API. This section describes way to obtain valid access token and use it to access protected resources.
 
@@ -312,7 +306,7 @@ Create new *application* of particular financing type
 + Request Example_VALID_REQUEST (application/json; charset=utf-8)
     + Attributes (ApplicationRequest)
       + `customer` (Customer, required) - Customer information
-          + `addresses` (array[Address], fixed-type, required) - Addresses. Only `BILLING` and `DELIVERY` types are allowed.
+          + `addresses` (array[Address], fixed-type, required) - Addresses. Only `PERMANENT` and `CONTACT` types are allowed.
               + Sample
                   + (object)
                       + `name`: `John Newborn`
@@ -333,7 +327,7 @@ Create new *application* of particular financing type
 + Request Example_REPEATED_VALID_REQUEST (application/json; charset=utf-8)
     + Attributes (ApplicationRequest)
       + `customer` (Customer, required) - Customer information
-          + `addresses` (array[Address], fixed-type, required) - Addresses. Only `BILLING` and `DELIVERY` types are allowed.
+          + `addresses` (array[Address], fixed-type, required) - Addresses. Only `PERMANENT` and `CONTACT` types are allowed.
               + Sample
                   + (object)
                       + `name`: `John Newborn`
@@ -759,6 +753,39 @@ Search for *order* using specified parameters.
     + Attributes (Errors)
 
 
+
+# Group Scoring resources
+Services that allow partner e-shops to find out a probability of *application's* approval.
+
+
+## Precheck [/financing/v1/scorings/precheck]
+Simple operation for customer preliminary scoring. Returns a suitability of particular customer for financing services. It is best suitable for identifying clients who will probably be rejected. Take into account that positive recommendation can not guarantee customer's approval (it is not the main scoring) as the result is based on only a few elementary pieces of information about the customer.
+
+Resource has to be called with valid access token (see the [Security section](#reference/security)) from your server. If you plan to integrate it in a client flow, you should implement REST endpoint bound to your shopping basket session that will be used as a proxy to call HC API - **NEVER put access token directly to client side**.
+
+Possible error codes explanation:
+| Status code | Code                | Explanation                                                                     |
+| ---         | ---                 | ---                                                                             |
+| 400         | INVALID_REQUEST     | Request was not well formatted (malformed request syntax, size too large, etc.) |
+| 500         | FAILURE             | Internal failure                                                                |
+
+### Run precheck [POST]
+
++ Request (application/json; charset=utf-8)
+    + Attributes (PrecheckRequest)
+
+
++ Response 200(application/json; charset=utf-8)
+
+    + Attributes (PrecheckResult)
+
+
++ Response 400(application/json; charset=utf-8)
+        Error in processing request
+
+    + Attributes (Errors)
+
+
 # Group Installments calculator resources
 When you want to provide your customer (that wants to pay for a purchase by a loan) an option to choose from available installment programs while he is still on your website, it is necessary to implement "installments calculator".
 
@@ -986,19 +1013,18 @@ Notify partner about changes in application.
     + Attributes (NotificationRequest)
         + `stateReason`: `PROCESSING_APPROVED` (enum, required) - Describes internal state of application, e.g. when state is PROCESSING - reason why application remains in processing state
            + `PROCESSING_REDIRECT_NEEDED` - Redirect to HC is needed. Redirect user to `gatewayRedirectUrl`.
-           + `PROCESSING_NEW` - New application created
            + `PROCESSING_PREAPPROVED` - Preliminary approval by HC
-           + `REJECTED` - Rejected by HC
            + `PROCESSING_APPROVED` - Approved by HC, to be signed by client
            + `PROCESSING_REVIEW` - Manual review by HC in progress
            + `PROCESSING_ALT_OFFER` - Alternative offered to client
            + `PROCESSING_SIGNED` - Signed by client, to verification by HC
-           + `CANCELLED_NOT_PAID` - Cancelled before delivery
            + `READY_TO_SHIP` - Financing approved, goods ready to be shipped to client
            + `READY_SHIPPED` - Goods shipped to client
            + `READY_DELIVERING` - Verification of goods delivery
            + `READY_DELIVERED` - Goods delivered to client
            + `READY_PAID` - Paid to merchant
+           + `REJECTED` - Rejected by HC
+           + `CANCELLED_NOT_PAID` - Cancelled before delivery
            + `CANCELLED_RETURNED` - Cancelled after delivery, goods returned to merchant
 
 
@@ -1012,7 +1038,60 @@ Notify partner about changes in application.
 
         Can not process changes
 
+# Group Testing & Integration
+This section should help new partner's e-shop developers with better understanding of the API and connected processes especially during early stages of the API integration.
 
+> Temporarily described in separate document (currently written in Czech) "Základní informace k platební metodě HC On-line.docx" obtainable through a request at integrace_eshop@homecredit.cz.
+
+This section also contains resources for easier integration to API.
+
+> NOTE: Valid access token is required for the usage of these resources (the same acces token used for the whole API)
+
+> NOTE: Those resources work only on testing and integration environments.
+
+## Change application state - integration usage only [/fakeshop/rest/applications/{applicationId}/changeState]
+Use this resource for changing Application state (`stateReason`) to desired one. Following table contains allowed transitions for this resource.
+
+| Current stateReason of Application (from) | Available transitions (to) |
+| --- | --- |
+| `PROCESSING_REDIRECT_NEEDED`| `PROCESSING_APPROVED`, `PROCESSING_SIGNED`, `READY_TO_SHIP`, `REJECTED`, `CANCELLED_NOT_PAID` |
+| `PROCESSING_APPROVED`| `PROCESSING_SIGNED`, `READY_TO_SHIP`, `CANCELLED_NOT_PAID` |
+| `PROCESSING_SIGNED`| `READY_TO_SHIP`, `CANCELLED_NOT_PAID` |
+| `READY_SHIPPED`| `CANCELLED_NOT_PAID` |
+| `READY_DELIVERED`| `CANCELLED_RETURNED` |
+
+> NOTE: This action simulates real application process, which means that Application may be moved through one or multiple steps (`stateReason`) - as described in state diagram [State diagram of Application](https://github.com/mdostal-hci/oneclick-images/raw/master/StateDiagramApplication.png). That is why you may receive multiple notifications about changes of Application's state. Example: if you request change from `PROCESSING_REDIRECT_NEEDED` to `READY_TO_SHIP`, you will receive `PROCESSING_APPROVED` and `READY_TO_SHIP` notifications.
+
+
++ Parameters
+    + applicationId (string, required, `01-11200a0ee1`)
+
+### Change application state - integration usage [POST]
+
++ Request Valid_request (application/json; charset=utf-8)
+    + Attributes (IntegrationChangeStateRequest)
+
++ Response 200 (application/json; charset=utf-8)
+   + Attributes (ApplicationBase)
+
+
++ Request Application_not_found (application/json; charset=utf-8)
+   + Attributes (IntegrationChangeStateRequest)
+
++ Response 404 (application/json; charset=utf-8)
+
+         Application does not exist
+
+     + Attributes (ErrorsNotFound)
+
++ Request Application_transition_not_allowed (application/json; charset=utf-8)
+   + Attributes (IntegrationChangeStateRequest)
+
++ Response 422 (application/json; charset=utf-8)
+
+         Transition is not allowed
+
+     + Attributes (ErrorsNotSupported)
 
 # Data Structures
 
@@ -1041,6 +1120,7 @@ Financing application request
     + `INSTALLMENT` - Pay in monthly installments ("nákup na splátky")
 + `settingsInstallment` (SettingsInstallment, required) - Settings for INSTALLMENT Application type.
 + `merchantUrls` (MerchantUrls, required) - Collection of partner's URLs used for redirection of a customer back to a partner website or as a notification endpoint
++ `precheckIds` (array[string], optional) - Array of all precheck ids related to this application. See [Precheck operation](#reference/scoring-resources/precheck/create-application) and it's response.
 
 ## ApplicationBase (object)
 Financing application base information
@@ -1055,17 +1135,17 @@ Financing application base information
 + `stateReason`: `PROCESSING_REDIRECT_NEEDED` (enum, required) - Describes internal state of application, e.g. when state is PROCESSING - reason why application remains in processing state
     + `PROCESSING_REDIRECT_NEEDED` - Redirect to HC is needed. Redirect user to `gatewayRedirectUrl`.
     + `PROCESSING_PREAPPROVED` - Preliminary approval by HC
-    + `REJECTED` - Rejected by HC
     + `PROCESSING_APPROVED` - Approved by HC, to be signed by client
     + `PROCESSING_REVIEW` - Manual review by HC in progress
     + `PROCESSING_ALT_OFFER` - Alternative offered to client
     + `PROCESSING_SIGNED` - Signed by client, to verification by HC
-    + `CANCELLED_NOT_PAID` - Cancelled before delivery
     + `READY_TO_SHIP` - Financing approved, goods ready to be shipped to client
     + `READY_SHIPPED` - Goods shipped to client
     + `READY_DELIVERING` - Verification of goods delivery
     + `READY_DELIVERED` - Goods delivered to client
     + `READY_PAID` - Paid to merchant
+    + `REJECTED` - Rejected by HC
+    + `CANCELLED_NOT_PAID` - Cancelled before delivery
     + `CANCELLED_RETURNED` - Cancelled after delivery, goods returned to merchant
 
 
@@ -1090,7 +1170,7 @@ Customer data
 + `fullName`: `Ing. John Newborn, Csc.` (string, optional) - Customer full name, including academical degrees and salutation. Required only if `firstName` and `lastName` are empty.
 + `email`: `john.newborn@country.com` (string, required) - E-mail address of customer
 + `phone`: `+420777123456` (string, required) - Phone number with country code (including leading `+`)
-+ `addresses` (array[Address], fixed-type, optional) - Addresses. All types are allowed.
++ `addresses` (array[Address], fixed-type, optional) - Addresses. Only `PERMANENT` and `CONTACT` types are allowed.
 + `tin`: `12333321` (string, optional) - Tax identification number (ICO)
 
 ## Customer (CustomerBase)
@@ -1260,6 +1340,28 @@ Collection of URLs used for redirection of a customer back to a partner website 
 + `notificationEndpoint`: `https://www.youreshop.cz/order/AA234` (string, required) - URL of the partner used as a notification endpoint for obtaining important updates about application (approval, rejection, storno, etc.).
 
 
+## PrecheckRequest (object)
+Precheck data.
+
+### Properties
++ `customer` (Customer, required) - Customer data
+
+
+## PrecheckResult (object)
+Precheck result.
+
+### Properties
++ `id` (string, required) - Unique identificator of Precheck. Send this identificator in ApplicationRequest for better approval rate.
++ `recommendation`:`false`  (boolean, required) - A recommendation of whether the order should be passed to the HCO.
+    true = Application is likely going to be approved.
+    false = Application is likely going to be rejected.
++ `message`:`V HCO peněžence nemáte dostatečný limit.` (string, optional) - Custom message for customer.
+    Examples:
+    “V HCO peněžence nemáte dostatečný limit.”
+    “Uveďte do objednávky jméno a příjmení, které používáte ve službě HCO.”
+    etc.
+
+
 ## File (object)
 
 ### Properties
@@ -1366,7 +1468,7 @@ API information
 ## NotificationRequest (ApplicationBase)
 + `orderNumber`: `AA234` (string, required) - Order number (internal for e-shop)
 + `notificationDate`: `2017-07-15T00:00:00+02:00` (string, required) – Date of change of application status.
-+ `orderState` (enum, required) - Order state.
++ `orderState`: `PROCESSING` (enum, required) - Order state.
     + `PROCESSING` - Order is being processed by merchant
     + `SENT` - All order items was sent to customer
     + `DELIVERED` - All order items was delivered to customer
@@ -1376,15 +1478,18 @@ API information
 + `checkSum`: `443E150D3406F6A8DC62C1DB224AFDD84FA9907071BB1AD9B2C7701031793662191501B26AADF3A31361341EA176C80B23D8A9A5E5B5219538289945FE0C20A7` (string, required) – Hashed message
 + `sequenceNumber`: 1 (number, required) - Sequence number of notification for corresponding application. Starts at value of 1.
 
+## IntegrationChangeStateRequest (object)
++ `stateReason`: `PROCESSING_APPROVED` (enum, required) - Describes internal state of application, e.g. when state is PROCESSING - reason why application remains in processing state
+   + `REJECTED` - Rejected by HC
+   + `PROCESSING_APPROVED` - Approved by HC, to be signed by client
+   + `PROCESSING_SIGNED` - Signed by client, to verification by HC
+   + `READY_TO_SHIP` - Financing approved, goods ready to be shipped to client
+   + `CANCELLED_NOT_PAID` - Cancelled before delivery
+   + `CANCELLED_RETURNED` - Cancelled after delivery, goods returned to merchant
+
 ## KeyValue (object)
 + `key`: `user_agent` (string, required) - Key
 + `value` (object, required) - Value
-    + Sample
-      + (object)
-          + `Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/60.0.3112.91 Safari/537.36 Vivaldi/1.92.917.39`
-      + (object)
-          + `[1920,1040]`
-
 
 ## Error (object)
 + code: `BAD_REQUEST` (string, required) - Unique internal error code
