@@ -1120,7 +1120,7 @@ Financing application request
     + `INSTALLMENT` - Pay in monthly installments ("nákup na splátky")
 + `settingsInstallment` (SettingsInstallment, required) - Settings for INSTALLMENT Application type.
 + `merchantUrls` (MerchantUrls, required) - Collection of partner's URLs used for redirection of a customer back to a partner website or as a notification endpoint
-+ `precheckIds` (array[string], optional) - Array of all precheck ids related to this application. See [Precheck operation](#reference/scoring-resources/precheck/create-application) and it's response.
++ `precheckIds` (array[string], fixed-type, optional) - Array of all precheck ids related to this application. See [Precheck operation](#reference/scoring-resources/precheck/create-application) and it's response.
 
 ## ApplicationBase (object)
 Financing application base information
