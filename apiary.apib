@@ -7,6 +7,8 @@ API documentation for Home Credit One-Click API.
 
 In case of any question, please contact our integration department (integrace_eshop@homecredit.cz).
 
+> **IMPORTANT NOTE:** Resource calls made from **Slovakia** MUST use appropriate dedicated `.sk` endpoints. E.g. `https://api.homecredit.sk/financning/v1/applications`
+
 ## Getting started
 This online document describes Home Credit (HC) One-Click API - the means for partner e-shops through which they can offer their customers the benefits of one of Home Credit's payment methods.
 
@@ -504,12 +506,13 @@ If the request was successfully processed, you receive HTTP status code 200 and 
   - Application substate
 
 In other cases, you receive one of the following errors:
-| Status code | Code                  | Explanation                                                                     |
-| ---         | ---                   | ---                                                                             |
-| 400         | INVALID_REQUEST       | Request was not well formatted (malformed request syntax, size too large, etc.) |
-| 404         | OBJECT_NOT_FOUND      | The requested resource could not be found                                       |
-| 422         | NOT_SUPPORTED         | Resource is not supported for given financing type                              |
-| 500         | INTERNAL_SERVER_ERROR | Unexpected condition was encountered and no more specific message is suitable   |
+| Status code | Code                   | Explanation                                                                     |
+| ---         | ---                    | ---                                                                             |
+| 400         | INVALID_REQUEST        | Request was not well formatted (malformed request syntax, size too large, etc.) |
+| 404         | OBJECT_NOT_FOUND       | The requested resource could not be found                                       |
+| 422         | NOT_SUPPORTED          | Resource is not supported for given financing type                              |
+| 422         | DUPLICATE_ORDER_NUMBER | Change to already existing not cancelled order number is not allowed            |
+| 500         | INTERNAL_SERVER_ERROR  | Unexpected condition was encountered and no more specific message is suitable   |
 
 
 + Parameters
@@ -1205,7 +1208,7 @@ Customer data
 + reason (string, optional) - Reason of change.
 
 ## OrderChange (object)
-+ `number`: `AA234` (string, optional) - Order number (internal for e-shop)
++ `number`: `AA234` (string, optional) - Order number (internal for e-shop), empty string is not allowed.
 + `variableSymbols`: `123456`, `1234567` (array[string], fixed-type, optional) - Variable symbols (internal for e-shop)
 
 
