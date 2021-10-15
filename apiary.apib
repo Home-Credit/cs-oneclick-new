@@ -4,13 +4,11 @@ HOST: https://api.homecredit.cz
 # HC - OneClick API - Installments
 API documentation for Home Credit One-Click API.
 
-> Version of documentation: `1.25.2`
+> Version of documentation: `1.26.1`
 
 | Latest News |
 | ---         |
-| All VAT attributes (`Order.totalVat` and `Order.items[].totalVat`) as optional - They don't need to be filled in requests nor will be returned in responses anymore |
-| All `Order.addresses[]` attributes as optional - They don't need to be filled in requests nor will be returned in responses anymore                                 |
-| Cancel application returns HTTP `202 Accepted` in case application has been already paid (`Application.stateReason = READY_PAID`)                                   |
+| New `flags` attribute in [calculations resources](#reference/installments-calculator-resources/installment-programs-offers) marking products with delayed first installment.                                   |
 
 
 In case of any question, please contact our integration department (integrace_eshop@homecredit.cz).
@@ -1377,18 +1375,28 @@ Installment programs
 
 ### Properties
 + `productCode`: `COCONL06` (string, required) - Installment program product code
-+ `type` (enum, optional) - Program type
-   + `MINIMAL` - Lowest installment
-   + `FAVOURITE` - Recommended (favourite) installment program
-   + `OTHER` - Other
++ `type` (enum, optional) - DEPRECATED. Do not use this attribute, use attribute `flags` instead. Attribute `type` remains in the API for backward compatibility
+    + `MINIMAL` - Lowest installment
+    + `FAVOURITE` - Recommended (favourite) installment program
+    + `OTHER` - Other
++ `flags` (array[InstallmentProgramFlag], optional) - Installment program flag. Multiple flags for one program are allowed.
 + `installment` (AmountOld, optional) - monthly installment amount
-   + `amount`: 221900 (number, required) - Amount in minor units (250000 represents 2500 CZK/EUR) [ISO 4217](https://en.wikipedia.org/wiki/ISO_4217)
+    + `amount`: 221900 (number, required) - Amount in minor units (250000 represents 2500 CZK/EUR) [ISO 4217](https://en.wikipedia.org/wiki/ISO_4217)
 + `numberOfInstallments`: 6 (number, optional) - installment count
 
 
 ## InstallmentProgramDetail (InstallmentProgram)
 + `detail` (CalculationDetail, optional) - Calculation detailed information.
 
+## InstallmentProgramFlag (object)
++ `type` (enum, required) - Flag type
+    + `MINIMAL` - Lowest installment
+    + `FAVOURITE` - Recommended (favourite) installment program
+    + `DELAY_FIRST_INSTALLMENT` - First installment of this installment program is due in several months (it is postponed)
+    + `BENEFIT` - Installment program offers some form of benefit for customer
+    + `OTHER` - Other
++ `delayFirstInstallment`: 2 (number, optional) - The number of months for which the installment will be postponed. Required for `DELAY_FIRST_INSTALLMENT` flag.
++ `benefit`: `TURBO` (string, optional) - Type of benefit. Required for `BENEFIT` flag.
 
 ## CalculationDetail (object)
 + `installmentDay`: 20 (number, optional) - Installment date (day in month)
@@ -1632,7 +1640,7 @@ Precheck results.
 + `results` (array[ObsoletePrecheckResult], fixed-type, required) - Precheck results for each type of product.
 + `limits` (ObsoleteLimits, optional)
    Customer limits.
-   Estimated in case we don!t know the customer.
+   Estimated in case we don't know the customer.
    Current customer's limits in case we know him and customer give us an approval for their usage.
 
 ## ObsoleteLimits (object)
