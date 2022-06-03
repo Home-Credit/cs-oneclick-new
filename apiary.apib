@@ -8,7 +8,22 @@ API documentation for Home Credit One-Click API.
 
 | Latest News |
 | ---         |
-| New `flags` attribute in [calculations resources](#reference/installments-calculator-resources/installment-programs-offers) marking products with delayed first installment.                                   |
+| Validations in [Create Application resource](#reference/application-resources/create-application) have been made more flexible: some attributes in Create Application Request were changed from required to optional. Full list of affected attributes follows under the table. |
+
+>List of attributes switching from required to optional:
+>- request.customer
+>- request.customer.firstName
+>- request.customer.lastName
+>- request.customer.fullName
+>- request.customer.email
+>- request.customer.phone
+>- request.customer.addresses
+>- request.customer.addresses.city
+>- request.customer.addresses.streetAddress
+>- request.customer.addresses.streetNumber
+>- request.customer.addresses.zip
+>- request.customer.addresses.addressType
+>- request.merchantUrls.notificationEndpoint
 
 
 In case of any question, please contact our integration department (integrace_eshop@homecredit.cz).
